@@ -2,6 +2,11 @@
 
 **A simple toolkit for Angular Reactive Forms, to build scalable, type-safe and dynamic forms.**
 
+THIS LIBRARY IS IN RELEASE CANDIDATE MODE AND THE CODE AS WELL AS THE DOCUMENTATION
+IS NOT YET CONSIDERED STABLE!
+
+Project Documentation Website: 
+
 ## Reduce the complexity of your form implementations
 
 Have you ever implemented large and dynamic forms using the standard Angular Reactive Forms module? 

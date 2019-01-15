@@ -122,9 +122,12 @@ export class PersonEffects {
           id: uuid(),
           firstName,
           lastName,
-          formKey: this.formRegistry.createAndRegisterForm(regularPersonFormDefinition, uuid(), {
-            firstName,
-            lastName
+          formKey: this.formRegistry.createAndRegisterForm(regularPersonFormDefinition, {
+            key: uuid(),
+            initialData: {
+              firstName,
+              lastName
+            }
           })
         };
       })
@@ -141,10 +144,13 @@ export class PersonEffects {
           firstName,
           lastName,
           emailAddress,
-          formKey: this.formRegistry.createAndRegisterForm(mainPersonFormDefinition, uuid(), {
-            firstName,
-            lastName,
-            emailAddress
+          formKey: this.formRegistry.createAndRegisterForm(mainPersonFormDefinition, {
+            key: uuid(),
+            initialData: {
+              firstName,
+              lastName,
+              emailAddress
+            }
           })
         };
       })
