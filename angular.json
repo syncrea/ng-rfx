@@ -1,0 +1,142 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "rfx-docs": {
+      "root": "projects/rfx-docs",
+      "sourceRoot": "projects/rfx-docs/src",
+      "projectType": "application",
+      "prefix": "rfx",
+      "schematics": {},
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/rfx-docs",
+            "index": "projects/rfx-docs/src/index.html",
+            "main": "projects/rfx-docs/src/main.ts",
+            "polyfills": "projects/rfx-docs/src/polyfills.ts",
+            "tsConfig": "projects/rfx-docs/tsconfig.app.json",
+            "assets": [
+              "projects/rfx-docs/src/favicon.ico",
+              "projects/rfx-docs/src/assets"
+            ],
+            "styles": [
+              "projects/rfx-docs/src/styles.css"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/rfx-docs/src/environments/environment.ts",
+                  "with": "projects/rfx-docs/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "rfx-docs:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "rfx-docs:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "rfx-docs:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/rfx-docs/src/test.ts",
+            "polyfills": "projects/rfx-docs/src/polyfills.ts",
+            "tsConfig": "projects/rfx-docs/tsconfig.spec.json",
+            "karmaConfig": "projects/rfx-docs/karma.conf.js",
+            "styles": [
+              "projects/rfx-docs/src/styles.css"
+            ],
+            "scripts": [],
+            "assets": [
+              "projects/rfx-docs/src/favicon.ico",
+              "projects/rfx-docs/src/assets"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/rfx-docs/src/tsconfig.app.json",
+              "projects/rfx-docs/src/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "rfx-lib": {
+      "root": "projects/rfx-lib",
+      "sourceRoot": "projects/rfx-lib/src",
+      "projectType": "library",
+      "prefix": "rfx",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/rfx-lib/tsconfig.lib.json",
+            "project": "projects/rfx-lib/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/rfx-lib/src/test.ts",
+            "tsConfig": "projects/rfx-lib/tsconfig.spec.json",
+            "karmaConfig": "projects/rfx-lib/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/rfx-lib/tsconfig.lib.json",
+              "projects/rfx-lib/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "rfx-lib"
+}
