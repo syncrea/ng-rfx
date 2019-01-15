@@ -1,27 +1,91 @@
-# ReactiveFormsExtension
+# ng-rfx - Angular Reactive Forms Extension
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.2.1.
+**A simple toolkit for Angular Reactive Forms, to build scalable, type-safe and dynamic forms.**
 
-## Development server
+## Reduce the complexity of your form implementations
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Have you ever implemented large and dynamic forms using the standard Angular Reactive Forms module? 
+If you have, you probably know the pain of implementing forms in your application. This library aims 
+to solve this by providing the necessary toolkit to build scalable forms.
 
-## Code scaffolding
+## Key features of ng-rfx
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Design your forms using simple TypeScript interfaces!
+- Type-safety from design to implementation
+- Create forms declaratively using form definitions
+- Centralized form registry with typed keys to maintain type-safety
+- Redux / ngrx friendly by using serializable keys
+- Binding directive to obtain typed form controls and state directly in your view!
 
-## Build
+## Installation
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+```npm install --save ng-rfx```
 
-## Running unit tests
+## Usage
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Form Model and Typed Form Controls
 
-## Running end-to-end tests
+One of the core features of ng-rfx is to provide simple type-safety for your forms. You can
+leverage the utilities of ng-rfx without importing any NgModule in your application. Just 
+use ng-rfx typed form controls over the standard form controls of Angular. Start by defining
+your forms using a simple interface.
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+```typescript
+interface SimpleForm {
+  firstName: string;
+  lastName: string;
+}
+```
 
-## Further help
+Now you can use the typed form controls of ng-rfx and get rid of the no. 1 pain while
+implementing forms. Missing type information in forms can ruin the day (and your whole project!).
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+```typescript
+import {TypedFormGroup, TypedFormControl} from 'ng-rfx';
+
+const control = new TypedFormGroup<SimpleForm>({
+  firstName: new TypedFormControl<string>('First name'),
+  lastName: new TypedFormControl<string>('Last name')
+});
+```
+
+Typed form controls are inheriting from their counterpart in the standard Angular forms module.
+We know three types of form controls:
+
+|ng-rfx control       | inherits from | Type-safe API
+|:--------------------|:--------------|---
+| TypedFormControl<T> | FormControl   | `constructor(formState?: T, validatorOrOpts?: ..., asyncValidator?: ...)`
+|                     |               | `get typedValue(): T`
+|                     |               | `patchValue(value: T, options?: {...}`
+|                     |               | `setValue(value: T, options?: {...}`
+|                     |               | `reset(formState?: T, options?: {...}`
+| TypedFormGroup<F>   | FormGroup     | `constructor(controls?: {[K in keyof F]: TypedFormGroupChildInternal<F, K>}, validatorOrOpts?: ..., asyncValidator?: ...)`
+|                     |               | `get typedValue(): F`
+|                     |               | `typedGet<K extends keyof F>(key: K): TypedFormGroupChildInternal<F, K>`
+|                     |               | `patchValue(value: Partial<F>, options?: {...})`
+|                     |               | `setValue(value: F, options?: {...}`
+|                     |               | `reset(formState?: F, options?: {...}`
+| TypedFormArray<T>   | FormArray     | `constructor(controls?: T extends PrimitiveType ? TypedFormControl<T>[] : TypedFormGroup<T>[], validatorOrOpts?: ..., asyncValidator?: ...)`
+|                     |               | `get typedValue(): T[]`
+|                     |               | `typedAt(index: number): T`
+|                     |               | `patchValue(value: T[], options?: {...})`
+|                     |               | `setValue(value: T[], options?: {...}`
+|                     |               | `reset(formState?: T[], options?: {...}`
+
+You can use the new typed methods to handle your forms in a type-safe way:
+
+```typescript
+control.setValue({
+  firstName: 'Updated first',
+  lastName: 'Updated last'
+});
+```
+
+Inside of your view, you can access the typed children of your form group to
+create form control bindings:
+
+```html
+<input [formControl]="control.typedGet('firstName')"  type="text">
+```
+
+... documentation to be continued

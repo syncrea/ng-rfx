@@ -84,10 +84,10 @@ export class TypedFormGroup<F> extends FormGroup {
   }
 }
 
-type TypedFormControlOrGroupArrayInternal<T> = T extends PrimitiveType ? TypedFormControl<T>[] : TypedFormGroup<T>[];
+type TypedFormControlOrGroupArrayInternal<T> = T extends PrimitiveType ? TypedFormControl<T> : TypedFormGroup<T>;
 
 export class TypedFormArray<T> extends FormArray {
-  constructor(controls?: TypedFormControlOrGroupArrayInternal<T>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
+  constructor(controls?: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
     super(controls, validatorOrOpts, asyncValidator);
   }
 
@@ -95,7 +95,7 @@ export class TypedFormArray<T> extends FormArray {
     return this.value;
   }
 
-  typedAt(index: number): TypedFormControlOrGroupArrayInternal<T>[0] | null {
+  typedAt(index: number): TypedFormControlOrGroupArrayInternal<T> | null {
     const childControl = super.at(index);
     if (childControl instanceof TypedFormControl || childControl instanceof TypedFormGroup) {
       return <any>childControl;

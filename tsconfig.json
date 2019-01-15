@@ -24,6 +24,12 @@
       ],
       "rfx-lib/*": [
         "projects/rfx-lib/src/*"
+      ],
+      "ng-rfx": [
+        "projects/rfx-lib/src/public_api"
+      ],
+      "ng-rfx/*": [
+        "projects/rfx-lib/src/*"
       ]
     }
   }

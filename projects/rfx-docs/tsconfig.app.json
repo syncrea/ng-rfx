@@ -9,6 +9,7 @@
     "**/*.spec.ts"
   ],
   "path": {
-    "rfx": "../rfx-lib/src/public_api"
+    "rfx": "../rfx-lib/src/public_api",
+    "ng-rfx": "../rfx-lib/src/public_api"
   }
 }
