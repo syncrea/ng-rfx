@@ -1,4 +1,6 @@
 import {TypedFormArray, TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
+import {async} from '@angular/core/testing';
+import createSpy = jasmine.createSpy;
 
 describe('Typed personForm controls', () => {
   describe('typed personForm control', () => {
@@ -364,6 +366,80 @@ describe('Typed personForm controls', () => {
           age: 12
         }]
       });
+    });
+  });
+
+  describe('typedValueChanges', () => {
+    interface SimpleForm {
+      readonly firstName: string;
+      readonly lastName: string;
+    }
+
+    it('should emit changes on form control', () => {
+      const control = new TypedFormControl<string>('Default value');
+      const subscribeSpy = createSpy();
+      control.typedValueChanges.subscribe(subscribeSpy);
+      control.setValue('Changed value');
+      expect(subscribeSpy).toHaveBeenCalledTimes(1);
+      expect(subscribeSpy).toHaveBeenCalledWith('Changed value');
+    });
+
+    it('should emit changes on form group', () => {
+      const control = new TypedFormGroup<SimpleForm>({
+        firstName: new TypedFormControl('Initial first name'),
+        lastName: new TypedFormControl('Initial last name')
+      });
+      const subscribeSpy = createSpy();
+      control.typedValueChanges.subscribe(subscribeSpy);
+      control.patchValue({
+        firstName: 'Changed first name'
+      });
+      expect(subscribeSpy).toHaveBeenCalledTimes(1);
+      expect(subscribeSpy).toHaveBeenCalledWith({
+        firstName: 'Changed first name',
+        lastName: 'Initial last name'
+      });
+    });
+
+    it('should emit changes on native form array', () => {
+      const control = new TypedFormArray<SimpleForm>([
+        new TypedFormGroup({
+          firstName: new TypedFormControl('Initial first name 1'),
+          lastName: new TypedFormControl('Initial last name 1')
+        }),
+        new TypedFormGroup({
+          firstName: new TypedFormControl('Initial first name 2'),
+          lastName: new TypedFormControl('Initial last name 2')
+        })
+      ]);
+      const subscribeSpy = createSpy();
+      control.typedValueChanges.subscribe(subscribeSpy);
+      control.typedAt(1).patchValue({firstName: 'Changed first name 2'});
+      expect(subscribeSpy).toHaveBeenCalledTimes(1);
+      expect(subscribeSpy).toHaveBeenCalledWith([{
+        firstName: 'Initial first name 1',
+        lastName: 'Initial last name 1'
+      }, {
+        firstName: 'Changed first name 2',
+        lastName: 'Initial last name 2'
+      }]);
+    });
+
+    it('should emit changes on form group array', () => {
+      const control = new TypedFormArray<string>([
+        new TypedFormControl('Apples'),
+        new TypedFormControl('Bananas'),
+        new TypedFormControl('Strawberries')
+      ]);
+      const subscribeSpy = createSpy();
+      control.typedValueChanges.subscribe(subscribeSpy);
+      control.typedAt(2).setValue('Raspberries');
+      expect(subscribeSpy).toHaveBeenCalledTimes(1);
+      expect(subscribeSpy).toHaveBeenCalledWith([
+        'Apples',
+        'Bananas',
+        'Raspberries'
+      ]);
     });
   });
 });

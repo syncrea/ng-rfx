@@ -1,5 +1,6 @@
 import {PrimitiveType} from '../model';
 import {AbstractControlOptions, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn} from '@angular/forms';
+import {Observable} from 'rxjs';
 
 export class TypedFormControl<T> extends FormControl {
   constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
@@ -34,6 +35,10 @@ export class TypedFormControl<T> extends FormControl {
   }): void {
     super.reset(formState, options);
   }
+
+  get typedValueChanges(): Observable<T> {
+    return this.valueChanges;
+  }
 }
 
 type TypedFormGroupChildInternal<F, K extends keyof F> =
@@ -49,7 +54,7 @@ export class TypedFormGroup<F> extends FormGroup {
     return this.value;
   }
 
-  typedGet<K extends keyof F>(key: K): TypedFormGroupChildInternal<F, K> | null {
+  typedGet<K extends keyof F>(key: K): TypedFormGroupChildInternal<F, K> {
     const childControl = super.get(<string>key);
     if (childControl instanceof TypedFormControl || childControl instanceof TypedFormGroup || childControl instanceof TypedFormArray) {
       return <TypedFormGroupChildInternal<F, K>>childControl;
@@ -81,6 +86,10 @@ export class TypedFormGroup<F> extends FormGroup {
     emitEvent?: boolean;
   }): void {
     super.reset(formState, options);
+  }
+
+  get typedValueChanges(): Observable<F> {
+    return this.valueChanges;
   }
 }
 
@@ -127,5 +136,9 @@ export class TypedFormArray<T> extends FormArray {
     emitEvent?: boolean;
   }): void {
     super.reset(formState, options);
+  }
+
+  get typedValueChanges(): Observable<T[]> {
+    return this.valueChanges;
   }
 }

@@ -1,6 +1,11 @@
 {
   "name": "reactive-forms-extension",
-  "version": "1.0.0-rc2",
+  "author": "Gion Kunz <gion@syncrea.ch>",
+  "description": "A simple toolkit for Angular Reactive Forms, to build scalable, type-safe and dynamic forms.",
+  "homepage": "https://syncrea.github.io/ng-rfx/",
+  "repository": "github:syncrea/ng-rfx",
+  "license": "MIT",
+  "version": "1.0.0-rc3",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -8,9 +13,9 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
+    "pub": "ng build --project rfx-lib && ng build --prod --project rfx-docs && npm run gh-pub",
     "gh-pub": "node publish-gh-pages.js"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "~7.2.0",
     "@angular/common": "~7.2.0",

@@ -64,18 +64,21 @@ We know three types of form controls:
 |                     |               | `patchValue(value: T, options?: {...}`
 |                     |               | `setValue(value: T, options?: {...}`
 |                     |               | `reset(formState?: T, options?: {...}`
+|                     |               | `get typedValueChanges(): Observable<T>`
 | TypedFormGroup<F>   | FormGroup     | `constructor(controls?: {[K in keyof F]: TypedFormGroupChildInternal<F, K>}, validatorOrOpts?: ..., asyncValidator?: ...)`
 |                     |               | `get typedValue(): F`
 |                     |               | `typedGet<K extends keyof F>(key: K): TypedFormGroupChildInternal<F, K>`
 |                     |               | `patchValue(value: Partial<F>, options?: {...})`
 |                     |               | `setValue(value: F, options?: {...}`
 |                     |               | `reset(formState?: F, options?: {...}`
+|                     |               | `get typedValueChanges(): Observable<F>`
 | TypedFormArray<T>   | FormArray     | `constructor(controls?: T extends PrimitiveType ? TypedFormControl<T>[] : TypedFormGroup<T>[], validatorOrOpts?: ..., asyncValidator?: ...)`
 |                     |               | `get typedValue(): T[]`
 |                     |               | `typedAt(index: number): T`
 |                     |               | `patchValue(value: T[], options?: {...})`
 |                     |               | `setValue(value: T[], options?: {...}`
 |                     |               | `reset(formState?: T[], options?: {...}`
+|                     |               | `get typedValueChanges(): Observable<T[]>`
 
 You can use the new typed methods to handle your forms in a type-safe way:
 
