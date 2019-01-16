@@ -5,7 +5,7 @@
   "homepage": "https://syncrea.github.io/ng-rfx/",
   "repository": "github:syncrea/ng-rfx",
   "license": "MIT",
-  "version": "1.0.0-rc3",
+  "version": "1.0.0-rc4",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -13,8 +13,9 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "pub": "ng build --project rfx-lib && ng build --prod --project rfx-docs && npm run gh-pub",
-    "gh-pub": "node publish-gh-pages.js"
+    "pub": "ng build --project rfx-lib && ng build --prod --project rfx-docs && npm run copy-readme && npm run gh-pub",
+    "gh-pub": "node publish-gh-pages.js",
+    "copy-readme": "cp README.md dist/rfx-lib"
   },
   "dependencies": {
     "@angular/animations": "~7.2.0",
