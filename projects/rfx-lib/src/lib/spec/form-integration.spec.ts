@@ -349,11 +349,34 @@ describe('Form integration', () => {
         test: TestState;
       }
 
+      const initialFormStateProperties = {
+        dirty: false,
+        disabled: false,
+        enabled: true,
+        invalid: false,
+        pristine: true,
+        touched: false,
+        untouched: true,
+        valid: true,
+        pending: false
+      };
+
       const defaultFormState: TestState = {
         form: {
           value: {
             firstName: 'Initial personEditFormState first name',
             lastName: 'Initial personEditFormState last name'
+          },
+          ...initialFormStateProperties,
+          fields: {
+            firstName: {
+              value: 'Initial personEditFormState first name',
+              ...initialFormStateProperties
+            },
+            lastName: {
+              value: 'Initial personEditFormState last name',
+              ...initialFormStateProperties
+            }
           }
         }
       };

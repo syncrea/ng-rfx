@@ -55,15 +55,15 @@ export type FormDefinitionFields<F> = {
 };
 
 export interface FormStateControlBase {
-  readonly untouched?: boolean;
-  readonly touched?: boolean;
-  readonly pristine?: boolean;
-  readonly dirty?: boolean;
-  readonly valid?: boolean;
-  readonly invalid?: boolean;
-  readonly pending?: boolean;
-  readonly disabled?: boolean;
-  readonly enabled?: boolean;
+  readonly untouched: boolean;
+  readonly touched: boolean;
+  readonly pristine: boolean;
+  readonly dirty: boolean;
+  readonly valid: boolean;
+  readonly invalid: boolean;
+  readonly pending: boolean;
+  readonly disabled: boolean;
+  readonly enabled: boolean;
   readonly errors?: string[];
 }
 
@@ -72,17 +72,17 @@ export type FormStateGroupFields<F> = {
 };
 
 export interface FormStateGroup<F> extends FormStateControlBase {
-  readonly value?: F;
-  readonly fields?: FormStateGroupFields<F>;
+  readonly value: F;
+  readonly fields: FormStateGroupFields<F>;
 }
 
 export interface FormStateArray<E> extends FormStateControlBase {
-  readonly value?: E[];
-  readonly items?: FormState<E>[];
+  readonly value: E[];
+  readonly items: FormState<E>[];
 }
 
 export interface FormStateControl<T> extends FormStateControlBase {
-  readonly value?: T;
+  readonly value: T;
 }
 
 export type FormState<F> =

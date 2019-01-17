@@ -1,6 +1,6 @@
 {
   "name": "ng-rfx",
-  "version": "1.0.0-rc4",
+  "version": "1.0.0-rc5",
   "author": "Gion Kunz <gion@syncrea.ch>",
   "description": "A simple toolkit for Angular Reactive Forms, to build scalable, type-safe and dynamic forms.",
   "homepage": "https://syncrea.github.io/ng-rfx/",
