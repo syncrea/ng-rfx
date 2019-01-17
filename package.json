@@ -5,7 +5,7 @@
   "homepage": "https://syncrea.github.io/ng-rfx/",
   "repository": "github:syncrea/ng-rfx",
   "license": "MIT",
-  "version": "1.0.0-rc5",
+  "version": "1.0.0-rc6",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
