@@ -15,6 +15,11 @@ export interface FormRegistryEntry<T> {
   formDefinition?: FormDefinition<T>;
 }
 
+export interface FormCreationOptions<T> {
+  key?: FormRegistryKey<T>;
+  initialData?: InitialFormData<T>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,10 +28,7 @@ export class FormRegistryService {
 
   constructor(@Inject(RFX_ERROR_RESOLVER) @Optional() private errorResolver: ErrorMessageResolver) {}
 
-  createAndRegisterForm<T>(formDefinition: FormDefinition<T>, options?: {
-    key?: FormRegistryKey<T>,
-    initialData?: InitialFormData<T>
-  }): FormRegistryKey<T> {
+  createAndRegisterForm<T>(formDefinition: FormDefinition<T>, options?: FormCreationOptions<T>): FormRegistryKey<T> {
     let key = normalizeKey(options && options.key);
 
     if (key && this.forms[key.id]) {
@@ -40,7 +42,7 @@ export class FormRegistryService {
       formDefinition
     };
     if (options && options.initialData) {
-      (<any>this.forms[key.id].form.setValue)(options.initialData);
+      (<any>this.forms[key.id].form.patchValue)(options.initialData);
     }
     return key;
   }

@@ -106,4 +106,4 @@ export interface TypedFormRegistryKey<T> {
 
 export type FormRegistryKey<T> = TypedFormRegistryKey<T> | string;
 
-export type InitialFormData<T> = T extends (infer E)[] ? Partial<E>[] : T;
+export type InitialFormData<T> = T extends (infer E)[] ? Partial<E>[] : Partial<T>;
