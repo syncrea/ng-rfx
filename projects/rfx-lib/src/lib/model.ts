@@ -7,7 +7,7 @@ export interface ErrorMessages {
 
 export type ErrorMessageResolver = (control: AbstractControl, path: string[]) => string[] | null;
 
-export type PrimitiveType = string | number | boolean;
+export type PrimitiveType = string | number | boolean | undefined | null;
 
 export type FormDefinitionTypeLiteral = 'Field' | 'Group' | 'GroupArray' | 'PrimitiveArray';
 

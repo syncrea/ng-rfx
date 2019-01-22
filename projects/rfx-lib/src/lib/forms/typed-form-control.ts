@@ -1,6 +1,7 @@
 import {PrimitiveType} from '../model';
 import {AbstractControlOptions, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn} from '@angular/forms';
 import {Observable} from 'rxjs';
+import {EventEmitter} from '@angular/core';
 
 export class TypedFormControl<T> extends FormControl {
   constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
@@ -39,19 +40,50 @@ export class TypedFormControl<T> extends FormControl {
   get typedValueChanges(): Observable<T> {
     return this.valueChanges;
   }
+
+  private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
+    if (opts.emitEvent !== false) {
+      (<EventEmitter<any>>this.statusChanges).emit(this.status);
+    }
+  }
+
+  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsTouched({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsUntouched({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsDirty({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsPristine({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
 }
 
 type TypedFormGroupChildInternal<F, K extends keyof F> =
   F[K] extends PrimitiveType ? TypedFormControl<F[K]> :
   F[K] extends any[] ? TypedFormArray<F[K][0]> : TypedFormGroup<F[K]>;
+type TypedFromGroupControlsInternal<F> = {[K in keyof F]: TypedFormGroupChildInternal<F, K>};
 
 export class TypedFormGroup<F> extends FormGroup {
-  constructor(controls?: {[K in keyof F]: TypedFormGroupChildInternal<F, K>}, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
+  constructor(controls?: TypedFromGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
     super(controls, validatorOrOpts, asyncValidator);
   }
 
   get typedValue(): F {
     return this.value;
+  }
+
+  get typedControls(): TypedFromGroupControlsInternal<F> {
+    return <TypedFromGroupControlsInternal<F>>this.controls;
   }
 
   typedGet<K extends keyof F>(key: K): TypedFormGroupChildInternal<F, K> {
@@ -91,6 +123,32 @@ export class TypedFormGroup<F> extends FormGroup {
   get typedValueChanges(): Observable<F> {
     return this.valueChanges;
   }
+
+  private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
+    if (opts.emitEvent !== false) {
+      (<EventEmitter<any>>this.statusChanges).emit(this.status);
+    }
+  }
+
+  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsTouched({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsUntouched({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsDirty({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsPristine({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
 }
 
 type TypedFormControlOrGroupArrayInternal<T> = T extends PrimitiveType ? TypedFormControl<T> : TypedFormGroup<T>;
@@ -102,6 +160,10 @@ export class TypedFormArray<T> extends FormArray {
 
   get typedValue(): T[] {
     return this.value;
+  }
+
+  get typedControls(): TypedFormControlOrGroupArrayInternal<T>[] {
+    return <TypedFormControlOrGroupArrayInternal<T>[]>this.controls;
   }
 
   typedAt(index: number): TypedFormControlOrGroupArrayInternal<T> | null {
@@ -140,5 +202,31 @@ export class TypedFormArray<T> extends FormArray {
 
   get typedValueChanges(): Observable<T[]> {
     return this.valueChanges;
+  }
+
+  private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
+    if (opts.emitEvent !== false) {
+      (<EventEmitter<any>>this.statusChanges).emit(this.status);
+    }
+  }
+
+  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsTouched({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsUntouched({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsDirty({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
+  }
+
+  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+    super.markAsPristine({onlySelf: opts.onlySelf});
+    this.emitIfRequired(opts);
   }
 }

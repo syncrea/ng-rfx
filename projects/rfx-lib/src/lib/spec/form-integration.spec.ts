@@ -515,8 +515,8 @@ describe('Form integration', () => {
         lastNameInput.value = 'Updated last name view';
         lastNameInput.dispatchEvent(new Event('input'));
 
-        // 2 initial + 2 first name change + 2 last name change (always separate value + status changes)
-        expect(storeDispatchSpy).toHaveBeenCalledTimes(6);
+        // 2 initial + 2 first name change + 2 last name change (always separate value + status changes) + 2 dirty
+        expect(storeDispatchSpy).toHaveBeenCalledTimes(8);
         const action: UpdateTestFormAction = storeDispatchSpy.calls.mostRecent().args[0];
         expect(action.formState.value).toEqual({
           firstName: 'Updated first name view',

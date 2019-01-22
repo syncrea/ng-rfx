@@ -1,5 +1,4 @@
 import {TypedFormArray, TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
-import {async} from '@angular/core/testing';
 import createSpy = jasmine.createSpy;
 
 describe('Typed personForm controls', () => {
