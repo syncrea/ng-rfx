@@ -60,7 +60,7 @@ export function deepEquals(x, y) {
 }
 
 export function isPrimitiveType(value: any): value is PrimitiveType {
-  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
+  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null;
 }
 
 export function isPrimitiveListType(list: any): list is PrimitiveType[] {

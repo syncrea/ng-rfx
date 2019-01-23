@@ -3,6 +3,7 @@ import {createForm, pushFormGroupArrayItem} from '../forms/form-creation';
 
 export interface TestForm {
   name: string;
+  middleName: string;
   age: number;
   colors: string[];
   children: {name: string, age: number}[];
@@ -10,6 +11,7 @@ export interface TestForm {
     street: string;
     no: number;
   };
+  favoriteNumber: number;
 }
 
 const testFormDefinitionLong: FormDefinitionGroup<TestForm> = {
@@ -18,6 +20,10 @@ const testFormDefinitionLong: FormDefinitionGroup<TestForm> = {
     name: {
       type: 'Field',
       initialValue: 'Gion'
+    },
+    middleName: {
+      type: 'Field',
+      initialValue: null
     },
     age: {
       type: 'Field',
@@ -53,6 +59,10 @@ const testFormDefinitionLong: FormDefinitionGroup<TestForm> = {
           initialValue: 1
         }
       }
+    },
+    favoriteNumber: {
+      type: 'Field',
+      initialValue: null
     }
   }
 };
@@ -61,6 +71,7 @@ const testFormDefinitionShort: FormDefinitionGroup<TestForm> = {
   type: 'Group',
   fields: {
     name: 'Gion',
+    middleName: null,
     age: 33,
     colors: ['Red', 'Green', 'Blue'],
     children: {
@@ -77,7 +88,8 @@ const testFormDefinitionShort: FormDefinitionGroup<TestForm> = {
         street: 'Teststreet',
         no: 1
       }
-    }
+    },
+    favoriteNumber: null
   }
 };
 
@@ -94,6 +106,7 @@ describe('Form creation', () => {
       const form = createForm(testFormDefinitionLong);
       expect(form.typedValue).toEqual({
         name: 'Gion',
+        middleName: null,
         age: 33,
         colors: ['Red', 'Green', 'Blue'],
         address: {
@@ -103,7 +116,8 @@ describe('Form creation', () => {
         children: [{
           name: 'Zoé',
           age: 0
-        }]
+        }],
+        favoriteNumber: null
       });
     });
 
@@ -111,6 +125,7 @@ describe('Form creation', () => {
       const form = createForm(testFormDefinitionShort);
       expect(form.typedValue).toEqual({
         name: 'Gion',
+        middleName: null,
         age: 33,
         colors: ['Red', 'Green', 'Blue'],
         address: {
@@ -120,7 +135,8 @@ describe('Form creation', () => {
         children: [{
           name: 'Zoé',
           age: 0
-        }]
+        }],
+        favoriteNumber: null
       });
     });
   });
@@ -135,6 +151,7 @@ describe('Form creation', () => {
 
       expect(form.typedValue).toEqual({
         name: 'Gion',
+        middleName: null,
         age: 33,
         colors: ['Red', 'Green', 'Blue'],
         address: {
@@ -147,7 +164,8 @@ describe('Form creation', () => {
         }, {
           name: 'New Child',
           age: 0
-        }]
+        }],
+        favoriteNumber: null
       });
     });
   });
