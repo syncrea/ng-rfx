@@ -19,7 +19,7 @@ const testFormDefinitionLong: FormDefinitionGroup<TestForm> = {
   fields: {
     name: {
       type: 'Field',
-      initialValue: 'Gion'
+      initialValue: 'First name'
     },
     middleName: {
       type: 'Field',
@@ -70,7 +70,7 @@ const testFormDefinitionLong: FormDefinitionGroup<TestForm> = {
 const testFormDefinitionShort: FormDefinitionGroup<TestForm> = {
   type: 'Group',
   fields: {
-    name: 'Gion',
+    name: 'First name',
     middleName: null,
     age: 33,
     colors: ['Red', 'Green', 'Blue'],
@@ -105,7 +105,7 @@ describe('Form creation', () => {
     it('should create personForm from longhand definition', () => {
       const form = createForm(testFormDefinitionLong);
       expect(form.typedValue).toEqual({
-        name: 'Gion',
+        name: 'First name',
         middleName: null,
         age: 33,
         colors: ['Red', 'Green', 'Blue'],
@@ -124,7 +124,7 @@ describe('Form creation', () => {
     it('should create personForm from shorthand definition', () => {
       const form = createForm(testFormDefinitionShort);
       expect(form.typedValue).toEqual({
-        name: 'Gion',
+        name: 'First name',
         middleName: null,
         age: 33,
         colors: ['Red', 'Green', 'Blue'],
@@ -150,7 +150,7 @@ describe('Form creation', () => {
       });
 
       expect(form.typedValue).toEqual({
-        name: 'Gion',
+        name: 'First name',
         middleName: null,
         age: 33,
         colors: ['Red', 'Green', 'Blue'],

@@ -24,8 +24,8 @@ describe('FormRegistryService', () => {
 
       const simpleFormKey = service.createAndRegisterForm(simpleFormDefinition);
       const obtainedSimpleForm = service.getForm(simpleFormKey);
-      obtainedSimpleForm.typedGet('firstName').setValue('Gion');
-      expect(obtainedSimpleForm.typedGet('firstName').typedValue).toBe('Gion');
+      obtainedSimpleForm.typedGet('firstName').setValue('First name');
+      expect(obtainedSimpleForm.typedGet('firstName').typedValue).toBe('First name');
     });
 
     it('should remove registered personForm', () => {
@@ -76,9 +76,9 @@ describe('FormRegistryService', () => {
 
       const simpleFormKey = service.registerForm(form);
       const obtainedSimpleForm = service.getForm(simpleFormKey);
-      obtainedSimpleForm.typedGet('firstName').setValue('Gion');
+      obtainedSimpleForm.typedGet('firstName').setValue('First name');
 
-      expect(obtainedSimpleForm.typedGet('firstName').typedValue).toBe('Gion');
+      expect(obtainedSimpleForm.typedGet('firstName').typedValue).toBe('First name');
     });
 
     it('should emit personForm changes to observers', () => {
@@ -112,8 +112,8 @@ describe('FormRegistryService', () => {
       formObservable.subscribe(subscriptionSpy);
 
       form.setValue({
-        firstName: 'Gion',
-        lastName: 'Kunz'
+        firstName: 'First name',
+        lastName: 'Last name'
       });
 
       expect(subscriptionSpy).toHaveBeenCalledTimes(2);
@@ -121,8 +121,8 @@ describe('FormRegistryService', () => {
       expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(0)[0]).state.fields.firstName.value).toBe('');
       expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(0)[0]).state.fields.lastName.value).toBe('');
       // Second call is from the updated form data
-      expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(1)[0]).state.fields.firstName.value).toBe('Gion');
-      expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(1)[0]).state.fields.lastName.value).toBe('Kunz');
+      expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(1)[0]).state.fields.firstName.value).toBe('First name');
+      expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(1)[0]).state.fields.lastName.value).toBe('Last name');
     });
   });
 });
