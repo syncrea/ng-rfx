@@ -34,9 +34,8 @@ export interface FormDefinitionPrimitiveArray<T> extends FormDefinitionBase {
 
 export interface FormDefinitionGroupArray<F> extends FormDefinitionBase {
   readonly type: 'GroupArray';
-  readonly fields: FormDefinitionFields<F>;
+  readonly group: FormDefinitionGroup<F>;
   readonly initialItems?: number;
-  readonly groupOptions?: AbstractControlOptions;
 }
 
 export type FormDefinition<T> =

@@ -35,15 +35,18 @@ const testFormDefinitionLong: FormDefinitionGroup<TestForm> = {
     },
     children: {
       type: 'GroupArray',
-      fields: {
-        name: {
-          type: 'Field',
-          initialValue: 'Zoé'
+      group: {
+        type: 'Group',
+        fields: {
+          name: {
+            type: 'Field',
+            initialValue: 'Zoé'
+          },
+          age: {
+            type: 'Field',
+            initialValue: 0
+          }
         },
-        age: {
-          type: 'Field',
-          initialValue: 0
-        }
       },
       initialItems: 1
     },
@@ -76,9 +79,12 @@ const testFormDefinitionShort: FormDefinitionGroup<TestForm> = {
     colors: ['Red', 'Green', 'Blue'],
     children: {
       type: 'GroupArray',
-      fields: {
-        name: 'Zoé',
-        age: 0
+      group: {
+        type: 'Group',
+        fields: {
+          name: 'Zoé',
+          age: 0
+        }
       },
       initialItems: 1
     },

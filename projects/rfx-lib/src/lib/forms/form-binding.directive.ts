@@ -1,4 +1,4 @@
-import {Directive, EmbeddedViewRef, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef} from '@angular/core';
+import {Directive, EmbeddedViewRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef, ViewContainerRef} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {FormDefinition, FormRegistryKey, FormState, InitialFormData, TypedFormControlType} from '../model';
 import {FormRegistryService} from './form-registry.service';
@@ -17,20 +17,35 @@ export interface FormBindingDirectiveOptions<T> {
 @Directive({
   selector: '[rfxFormBinding]'
 })
-export class FormBindingDirective<F> implements OnInit, OnDestroy {
+export class FormBindingDirective<F> implements OnInit, OnChanges, OnDestroy {
   @Input() rfxFormBinding: FormRegistryKey<F>;
   @Input() rfxFormBindingFormDefinition?: FormDefinition<F>;
   @Input() rfxFormBindingOptions?: FormBindingDirectiveOptions<F>;
 
-  viewRef: EmbeddedViewRef<FormBindingDirectiveContext<F>>;
-  context: FormBindingDirectiveContext<F>;
-  formDataSubscription: Subscription;
+  private viewRef: EmbeddedViewRef<FormBindingDirectiveContext<F>>;
+  private formDataSubscription: Subscription;
 
   constructor(private formRegistry: FormRegistryService,
               private templateRef: TemplateRef<FormBindingDirectiveContext<F>>,
               private viewContainerRef: ViewContainerRef) {}
 
   ngOnInit() {
+    this.viewRef = this.viewContainerRef.createEmbeddedView(this.templateRef, {
+      formControl: null,
+      formState: null
+    });
+    this.ensureValidForm();
+    this.observeForm();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.rfxFormBinding.firstChange && this.rfxFormBinding) {
+      this.ensureValidForm();
+      this.observeForm();
+    }
+  }
+
+  private ensureValidForm() {
     if (!this.formRegistry.containsForm(this.rfxFormBinding) && this.rfxFormBindingFormDefinition) {
       this.formRegistry.createAndRegisterForm(this.rfxFormBindingFormDefinition, {
         key: this.rfxFormBinding,
@@ -41,17 +56,20 @@ export class FormBindingDirective<F> implements OnInit, OnDestroy {
     if (!this.formRegistry.containsForm(this.rfxFormBinding)) {
       noRegisteredFormForKeyAndNoFormDefinition(this.rfxFormBinding);
     }
+  }
 
-    this.context = {
-      formControl: null,
-      formState: null
-    };
-    this.viewRef = this.viewContainerRef.createEmbeddedView(this.templateRef, this.context);
-    this.formDataSubscription = this.formRegistry.observeForm<F>(this.rfxFormBinding).subscribe(formData => {
-      this.context.formState = formData.state;
-      this.context.formControl = formData.control;
-      this.viewRef.markForCheck();
-    });
+  private observeForm() {
+    if (this.formDataSubscription) {
+      this.formDataSubscription.unsubscribe();
+    }
+
+    this.formDataSubscription = this.formRegistry
+      .observeForm<F>(this.rfxFormBinding)
+      .subscribe(formData => {
+        this.viewRef.context.formState = formData.state;
+        this.viewRef.context.formControl = formData.control;
+        this.viewRef.markForCheck();
+      });
   }
 
   ngOnDestroy() {

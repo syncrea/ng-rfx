@@ -37,21 +37,13 @@ export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | 
     const controls = formDefinitionOrInitialValue.initialValue.map(initialValue => createForm(<any>initialValue));
     return new TypedFormArray(controls, formDefinitionOrInitialValue.options);
   } else if (formDefinitionOrInitialValue.type === 'GroupArray') {
-    const controls = Array.from({length: formDefinitionOrInitialValue.initialItems}).map(() => createForm({
-      type: 'Group',
-      fields: formDefinitionOrInitialValue.fields,
-      options: formDefinitionOrInitialValue.groupOptions
-    }));
+    const controls = Array.from({length: formDefinitionOrInitialValue.initialItems}).map(() => createForm(formDefinitionOrInitialValue.group));
     return new TypedFormArray(<any>controls, formDefinitionOrInitialValue.options);
   }
 }
 
 export function pushFormGroupArrayItem<F>(formArrayDefinition: FormDefinitionGroupArray<F>, formArray: TypedFormArray<F>, value?: F): TypedFormArray<F> {
-  const formControl = createForm({
-    type: 'Group',
-    fields: formArrayDefinition.fields,
-    options: formArrayDefinition.groupOptions
-  });
+  const formControl = createForm(formArrayDefinition.group);
   if (value) {
     formControl.setValue(value);
   }

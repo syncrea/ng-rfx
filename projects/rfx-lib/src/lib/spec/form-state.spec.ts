@@ -1,6 +1,6 @@
 import {AbstractControl, FormArray, FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {getFormState} from '../forms/form-state';
-import {TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
+import {TypedFormArray, TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
 
 interface SimpleForm {
   firstName: string;
@@ -341,6 +341,119 @@ describe('Form personEditFormState', () => {
             errors: null
           }
         }
+      });
+    });
+
+    it('should be created correctly on invalid group validator', () => {
+      const formArray = new TypedFormArray([
+        new TypedFormGroup<SimpleForm>({
+          firstName: new TypedFormControl<string>('First name'),
+          lastName: new TypedFormControl<string>('Last name')
+        }),
+        new TypedFormGroup<SimpleForm>({
+          firstName: new TypedFormControl<string>('First name'),
+          lastName: new TypedFormControl<string>('Last name')
+        }),
+        new TypedFormGroup<SimpleForm>({
+          firstName: new TypedFormControl<string>('First name', {
+            validators: [Validators.required]
+          }),
+          lastName: new TypedFormControl<string>('Last name')
+        })
+      ]);
+      formArray.typedAt(2).typedControls.firstName.setValue('');
+
+      const formGroupStateBase = {
+        dirty: false,
+        invalid: false,
+        pending: false,
+        pristine: true,
+        touched: false,
+        untouched: true,
+        valid: true,
+        disabled: false,
+        enabled: true,
+        errors: null,
+        value: {
+          firstName: 'First name',
+          lastName: 'Last name'
+        },
+        fields: {
+          firstName: {
+            value: 'First name',
+            dirty: false,
+            invalid: false,
+            pending: false,
+            pristine: true,
+            touched: false,
+            untouched: true,
+            valid: true,
+            disabled: false,
+            enabled: true,
+            errors: null
+          },
+          lastName: {
+            value: 'Last name',
+            dirty: false,
+            invalid: false,
+            pending: false,
+            pristine: true,
+            touched: false,
+            untouched: true,
+            valid: true,
+            disabled: false,
+            enabled: true,
+            errors: null
+          }
+        }
+      };
+
+      const formState = getFormState(formArray, (control: AbstractControl) => control.errors ? Object.keys(control.errors) : null);
+
+      expect(formState).toEqual({
+        dirty: false,
+        invalid: true,
+        pending: false,
+        pristine: true,
+        touched: false,
+        untouched: true,
+        valid: false,
+        disabled: false,
+        enabled: true,
+        errors: null,
+        value: [{
+          firstName: 'First name',
+          lastName: 'Last name'
+        }, {
+          firstName: 'First name',
+          lastName: 'Last name'
+        }, {
+          firstName: '',
+          lastName: 'Last name'
+        }],
+        items: [{
+          ...formGroupStateBase
+        }, {
+          ...formGroupStateBase
+        }, {
+          ...formGroupStateBase,
+          value: {
+            ...formGroupStateBase.value,
+            firstName: ''
+          },
+          invalid: true,
+          valid: false,
+          fields: {
+            ...formGroupStateBase.fields,
+            firstName: {
+              ...formGroupStateBase.fields.firstName,
+              value: '',
+              valid: false,
+              invalid: true,
+              errors: ['required']
+            }
+          }
+        }]
       });
     });
   });

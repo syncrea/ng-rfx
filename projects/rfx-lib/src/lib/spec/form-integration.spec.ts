@@ -1,7 +1,7 @@
 import {Component, Injectable, Input} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {merge, Observable} from 'rxjs';
+import {merge, Observable, of} from 'rxjs';
 import {TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
 import {FormData, FormDefinition, FormDefinitionGroup, FormRegistryKey, FormStateGroup} from '../model';
 import {FormRegistryService} from '../forms/form-registry.service';
@@ -14,6 +14,7 @@ import {uuid} from '../helper';
 import {By} from '@angular/platform-browser';
 import {ReactiveFormsExtensionModule} from '../reactive-forms-extension.module';
 import Spy = jasmine.Spy;
+import {FormBindingDirective} from 'ng-rfx';
 
 describe('Form integration', () => {
   describe('typed personForm controls', () => {
@@ -918,6 +919,7 @@ describe('Form integration', () => {
       let fixture: ComponentFixture<TestContainerComponent>;
       let component: TestContainerComponent;
       let storeService: Store<GlobalState>;
+      let formRegistryService: FormRegistryService;
       let storeDispatchSpy: Spy;
 
       beforeEach(() => {
@@ -938,6 +940,7 @@ describe('Form integration', () => {
         });
 
         storeService = TestBed.get(Store);
+        formRegistryService = TestBed.get(FormRegistryService);
         storeDispatchSpy = spyOn(storeService, 'dispatch').and.callThrough();
         fixture = TestBed.createComponent(TestContainerComponent);
         component = fixture.componentInstance;
@@ -968,6 +971,45 @@ describe('Form integration', () => {
 
           expect(fixture.debugElement.query(By.directive(TestPersonComponent))).toBeNull();
         });
+      }));
+
+      it('should react to changes of key', async(() => {
+        fixture.componentInstance.persons = of(<Person[]>[{
+          id: '1',
+          firstName: 'First name',
+          lastName: 'Last name',
+          formKey: formRegistryService.createAndRegisterForm(personFormDefinition, {
+            initialData: {
+              firstName: 'First name',
+              lastName: 'Last name'
+            }
+          })
+        }]);
+
+        fixture.detectChanges();
+
+        expect(fixture.debugElement.query(By.directive(TestPersonComponent))).toBeDefined();
+
+        fixture.componentInstance.persons = of(<Person[]>[{
+          id: '1',
+          firstName: 'Changed first name',
+          lastName: 'Changed last name',
+          formKey: formRegistryService.createAndRegisterForm(personFormDefinition, {
+            initialData: {
+              firstName: 'Changed first name',
+              lastName: 'Changed last name'
+            }
+          })
+        }]);
+        fixture.detectChanges();
+
+        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name');
+        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name');
+        const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name');
+
+        expect(personName.textContent.trim()).toEqual('Changed first name Changed last name');
+        expect(firstNameInput.value).toEqual('Changed first name');
+        expect(lastNameInput.value).toEqual('Changed last name');
       }));
     });
 
