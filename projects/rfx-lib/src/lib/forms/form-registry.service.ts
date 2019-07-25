@@ -7,6 +7,7 @@ import {RFX_ERROR_RESOLVER} from '../tokens';
 import {createForm} from './form-creation';
 import {deepEquals, normalizeKey, uuid} from '../helper';
 import {AbstractControl} from '@angular/forms';
+import { TypedFormRegistryKey } from 'dist/rfx-lib/ng-rfx';
 
 const defaultErrorResolver: ErrorMessageResolver = (control: AbstractControl, path: string[]) => control.errors ? Object.keys(control.errors) : null;
 
@@ -26,40 +27,41 @@ export interface FormCreationOptions<T> {
 export class FormRegistryService {
   private forms: {[id: string]: FormRegistryEntry<any>} = {};
 
-  constructor(@Inject(RFX_ERROR_RESOLVER) @Optional() private errorResolver: ErrorMessageResolver) {}
+  constructor(@Inject(RFX_ERROR_RESOLVER) @Optional() private errorResolver?: ErrorMessageResolver) {}
+
+  createOrNormalizeFormKey<T>(key?: FormRegistryKey<T>): TypedFormRegistryKey<T> {
+    return key ? normalizeKey(key) : {id: uuid()};
+  }
 
   createAndRegisterForm<T>(formDefinition: FormDefinition<T>, options?: FormCreationOptions<T>): FormRegistryKey<T> {
-    let key = normalizeKey(options && options.key);
-
-    if (key && this.forms[key.id]) {
-      return key;
-    } else if (!key) {
-      key = {id: uuid()};
+    let normalizedKey: FormRegistryKey<T> | null = null;
+    if (options && options.key) {
+      normalizedKey = normalizeKey(options.key);
     }
 
-    this.forms[key.id] = {
+    if (normalizedKey && this.forms[normalizedKey.id]) {
+      return normalizedKey;
+    } else if (!normalizedKey) {
+      normalizedKey = {id: uuid()};
+    }
+
+    this.forms[normalizedKey.id] = {
       form: createForm<T>(formDefinition),
       formDefinition
     };
     if (options && options.initialData) {
-      (<any>this.forms[key.id].form.patchValue)(options.initialData);
+      (<any>this.forms[normalizedKey.id].form.patchValue)(options.initialData);
     }
-    return key;
+    return normalizedKey;
   }
 
   registerForm<T>(form: TypedFormControlType<T>, key?: FormRegistryKey<T>): FormRegistryKey<T> {
-    key = normalizeKey(key);
+    const existingOrNewKey = this.createOrNormalizeFormKey(key);
 
-    if (key && this.forms[key.id]) {
-      return key;
-    } else if (!key) {
-      key = {id: uuid()};
-    }
-
-    this.forms[key.id] = {
+    this.forms[existingOrNewKey.id] = {
       form
     };
-    return key;
+    return existingOrNewKey;
   }
 
   getForm<T>(key: FormRegistryKey<T>): TypedFormControlType<T> | null  {

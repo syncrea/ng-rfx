@@ -1,6 +1,7 @@
 import {AbstractControl, FormArray, FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {getFormState} from '../forms/form-state';
 import {TypedFormArray, TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
+import { raiseError } from '../helper';
 
 interface SimpleForm {
   firstName: string;
@@ -361,7 +362,7 @@ describe('Form personEditFormState', () => {
           lastName: new TypedFormControl<string>('Last name')
         })
       ]);
-      formArray.typedAt(2).typedControls.firstName.setValue('');
+      (formArray.typedAt(2) || raiseError('Element with index 2 could not be obtained!')).typedControls.firstName.setValue('');
 
       const formGroupStateBase = {
         dirty: false,

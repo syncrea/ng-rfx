@@ -1,5 +1,6 @@
 import {TypedFormArray, TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
 import createSpy = jasmine.createSpy;
+import { raiseError } from '../helper';
 
 describe('Typed personForm controls', () => {
   describe('typed personForm control', () => {
@@ -262,7 +263,7 @@ describe('Typed personForm controls', () => {
           lastName: new TypedFormControl('Lastname 2')
         })
       ]);
-      expect(control.typedAt(1).typedGet('firstName').typedValue).toBe('Firstname 2');
+      expect((control.typedAt(1) || raiseError('Element at index 1 could not be obtained.')).typedGet('firstName').typedValue).toBe('Firstname 2');
     });
   });
 
@@ -413,7 +414,7 @@ describe('Typed personForm controls', () => {
       ]);
       const subscribeSpy = createSpy();
       control.typedValueChanges.subscribe(subscribeSpy);
-      control.typedAt(1).patchValue({firstName: 'Changed first name 2'});
+      (control.typedAt(1) || raiseError('Element at index 1 could not be obtained.')).patchValue({firstName: 'Changed first name 2'});
       expect(subscribeSpy).toHaveBeenCalledTimes(1);
       expect(subscribeSpy).toHaveBeenCalledWith([{
         firstName: 'Initial first name 1',
@@ -432,7 +433,7 @@ describe('Typed personForm controls', () => {
       ]);
       const subscribeSpy = createSpy();
       control.typedValueChanges.subscribe(subscribeSpy);
-      control.typedAt(2).setValue('Raspberries');
+      (control.typedAt(2) || raiseError('Element at index 2 could not be obtained.')).setValue('Raspberries');
       expect(subscribeSpy).toHaveBeenCalledTimes(1);
       expect(subscribeSpy).toHaveBeenCalledWith([
         'Apples',

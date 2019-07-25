@@ -21,7 +21,7 @@ export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | 
       initialValue: formDefinitionOrInitialValue
     });
   } else if (isPrimitiveListType(formDefinitionOrInitialValue)) {
-    return createForm({
+    return <any>createForm({
       type: 'PrimitiveArray',
       initialValue: formDefinitionOrInitialValue
     });
@@ -29,16 +29,18 @@ export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | 
     return new TypedFormControl(formDefinitionOrInitialValue.initialValue, formDefinitionOrInitialValue.options);
   } else if (formDefinitionOrInitialValue.type === 'Group') {
     const controls = Object.keys(formDefinitionOrInitialValue.fields).reduce((fieldControls, fieldName) => {
-      fieldControls[fieldName] = createForm(formDefinitionOrInitialValue.fields[fieldName]);
+      fieldControls[fieldName] = createForm((<any>formDefinitionOrInitialValue.fields)[fieldName]);
       return fieldControls;
-    }, <{ [k: string]: any }>{});
+    }, <any>{});
     return new TypedFormGroup(controls, formDefinitionOrInitialValue.options);
   } else if (formDefinitionOrInitialValue.type === 'PrimitiveArray') {
-    const controls = formDefinitionOrInitialValue.initialValue.map(initialValue => createForm(<any>initialValue));
+    const controls = (formDefinitionOrInitialValue.initialValue || []).map(initialValue => createForm(<any>initialValue));
     return new TypedFormArray(controls, formDefinitionOrInitialValue.options);
   } else if (formDefinitionOrInitialValue.type === 'GroupArray') {
-    const controls = Array.from({length: formDefinitionOrInitialValue.initialItems}).map(() => createForm(formDefinitionOrInitialValue.group));
+    const controls = Array.from({length: formDefinitionOrInitialValue.initialItems || 0}).map(() => createForm(formDefinitionOrInitialValue.group));
     return new TypedFormArray(<any>controls, formDefinitionOrInitialValue.options);
+  } else {
+    throw new Error(`Invalid form definition or initial value ${formDefinitionOrInitialValue}`);
   }
 }
 

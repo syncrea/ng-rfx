@@ -3,11 +3,12 @@ import createSpy = jasmine.createSpy;
 import {FormDefinitionGroup, FormData} from '../model';
 import {createForm} from '../forms/form-creation';
 import {FormRegistryService} from '../forms/form-registry.service';
+import { raiseError } from '../helper';
 
 describe('FormRegistryService', () => {
   describe('simple service tests', () => {
     it('should register custom personForm', () => {
-      const service = new FormRegistryService(null);
+      const service = new FormRegistryService();
 
       interface SimpleForm {
         readonly firstName: string;
@@ -23,13 +24,13 @@ describe('FormRegistryService', () => {
       };
 
       const simpleFormKey = service.createAndRegisterForm(simpleFormDefinition);
-      const obtainedSimpleForm = service.getForm(simpleFormKey);
+      const obtainedSimpleForm = service.getForm(simpleFormKey) || raiseError('Form could not be obtained from service.');
       obtainedSimpleForm.typedGet('firstName').setValue('First name');
       expect(obtainedSimpleForm.typedGet('firstName').typedValue).toBe('First name');
     });
 
     it('should remove registered personForm', () => {
-      const service = new FormRegistryService(null);
+      const service = new FormRegistryService();
 
       interface SimpleForm {
         readonly firstName: string;
@@ -51,7 +52,7 @@ describe('FormRegistryService', () => {
     });
 
     it('should create and register custom personForm', () => {
-      const service = new FormRegistryService(null);
+      const service = new FormRegistryService();
 
       interface SimpleForm {
         readonly firstName: string;
@@ -75,14 +76,14 @@ describe('FormRegistryService', () => {
       const form = createForm(simpleFormDefinition);
 
       const simpleFormKey = service.registerForm(form);
-      const obtainedSimpleForm = service.getForm(simpleFormKey);
+      const obtainedSimpleForm = service.getForm(simpleFormKey) || raiseError('Form could not be obtained from service.');
       obtainedSimpleForm.typedGet('firstName').setValue('First name');
 
       expect(obtainedSimpleForm.typedGet('firstName').typedValue).toBe('First name');
     });
 
     it('should emit personForm changes to observers', () => {
-      const service = new FormRegistryService(null);
+      const service = new FormRegistryService();
 
       interface SimpleForm {
         readonly firstName: string;
@@ -108,7 +109,7 @@ describe('FormRegistryService', () => {
       const subscriptionSpy = createSpy('formObservableSubscription');
 
       const simpleFormKey = service.registerForm(form);
-      const formObservable = service.observeForm(simpleFormKey);
+      const formObservable = service.observeForm(simpleFormKey) || raiseError('Form could not be obtained from service.');
       formObservable.subscribe(subscriptionSpy);
 
       form.setValue({

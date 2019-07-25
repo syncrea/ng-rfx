@@ -63,7 +63,7 @@ export interface FormStateControlBase {
   readonly pending: boolean;
   readonly disabled: boolean;
   readonly enabled: boolean;
-  readonly errors?: string[];
+  readonly errors: string[] | null;
 }
 
 export type FormStateGroupFields<F> = {
@@ -91,7 +91,7 @@ export type FormState<F> =
 
 export type TypedFormControlType<T> =
   T extends PrimitiveType ? TypedFormControl<T> :
-    T extends any[] ? TypedFormArray<T[0]> :
+    T extends (infer E)[] ? TypedFormArray<E> :
       TypedFormGroup<T>;
 
 export interface FormData<T> {

@@ -3,14 +3,14 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {merge, Observable, of} from 'rxjs';
 import {TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
-import {FormData, FormDefinition, FormDefinitionGroup, FormRegistryKey, FormStateGroup} from '../model';
+import {FormData, FormDefinition, FormDefinitionGroup, FormRegistryKey, FormStateGroup, FormStateControlBase} from '../model';
 import {FormRegistryService} from '../forms/form-registry.service';
 import {createForm} from '../forms/form-creation';
 import {Action, select, Store, StoreModule} from '@ngrx/store';
-import {filter, map, take, tap} from 'rxjs/operators';
+import {filter, map, take, tap, skipWhile} from 'rxjs/operators';
 import {getFormState} from '../forms/form-state';
 import {Actions, Effect, EffectsModule} from '@ngrx/effects';
-import {uuid} from '../helper';
+import {uuid, raiseError} from '../helper';
 import {By} from '@angular/platform-browser';
 import {ReactiveFormsExtensionModule} from '../reactive-forms-extension.module';
 import Spy = jasmine.Spy;
@@ -161,7 +161,8 @@ describe('Form integration', () => {
 
         const form = createForm(simpleFormDefinition);
         const formKey = formRegistryService.registerForm(form);
-        component.form = formRegistryService.observeForm(formKey);
+        component.form = formRegistryService.observeForm(formKey) || raiseError(`Form observable needs to be set!`);
+
         fixture.detectChanges();
 
         const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name');
@@ -188,7 +189,7 @@ describe('Form integration', () => {
 
         const form = createForm(simpleFormDefinition);
         const formKey = formRegistryService.registerForm(form);
-        component.form = formRegistryService.observeForm(formKey);
+        component.form = formRegistryService.observeForm(formKey) || raiseError(`Form observable needs to be set!`);
 
         form.patchValue({
           firstName: ''
@@ -196,11 +197,12 @@ describe('Form integration', () => {
         form.typedGet('firstName').markAsTouched();
         fixture.detectChanges();
 
-        const errorsElement: HTMLDivElement = fixture.nativeElement.querySelector('.first-name-errors');
+        const errorsElement: HTMLDivElement = fixture.nativeElement.querySelector('.first-name-errors')
+          || raiseError(`Test DOM Element not found!`);
 
         expect(form.typedGet('firstName').typedValue).toBe('');
         expect(form.typedGet('lastName').typedValue).toBe('Initial last name');
-        expect(errorsElement.textContent.trim()).toBe('required');
+        expect((errorsElement.textContent || '').trim()).toBe('required');
       });
     });
   });
@@ -307,23 +309,24 @@ describe('Form integration', () => {
     it('should render initial state in view correctly', () => {
       fixture.detectChanges();
 
-      const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name');
+      const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name') 
+        || raiseError(`Test DOM Element not found!`);
 
-      expect(personName.textContent.trim()).toBe('Initial first name Initial last name');
+      expect((personName.textContent || '').trim()).toBe('Initial first name Initial last name');
     });
 
     it('should detect change automatically after state update', () => {
       fixture.autoDetectChanges();
 
-      const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name');
-      const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name');
-      const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name');
+      const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name') || raiseError(`Test DOM Element not found!`);
+      const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name') || raiseError(`Test DOM Element not found!`);
+      const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name') || raiseError(`Test DOM Element not found!`);
       firstNameInput.value = 'Changed first name';
       lastNameInput.value = 'Changed last name';
       firstNameInput.dispatchEvent(new Event('input'));
       lastNameInput.dispatchEvent(new Event('input'));
 
-      expect(personName.textContent.trim()).toBe('Changed first name Changed last name');
+      expect((personName.textContent || '').trim()).toBe('Changed first name Changed last name');
     });
   });
 
@@ -350,7 +353,7 @@ describe('Form integration', () => {
         test: TestState;
       }
 
-      const initialFormStateProperties = {
+      const initialFormStateProperties: FormStateControlBase = {
         dirty: false,
         disabled: false,
         enabled: true,
@@ -359,7 +362,8 @@ describe('Form integration', () => {
         touched: false,
         untouched: true,
         valid: true,
-        pending: false
+        pending: false,
+        errors: null
       };
 
       const defaultFormState: TestState = {
@@ -432,7 +436,7 @@ describe('Form integration', () => {
       })
       class TestContainerComponent {
         formControl: TypedFormGroup<SimpleForm>;
-        formState: Observable<FormStateGroup<SimpleForm>>;
+        formState: Observable<FormStateGroup<SimpleForm> | null>;
 
         constructor(private store: Store<GlobalState>) {
           this.formControl = createForm(simpleFormDefinition);
@@ -451,7 +455,11 @@ describe('Form integration', () => {
           // Initialize from group control with initial data from personEditFormState
           this.formState.pipe(
             take(1)
-          ).subscribe(formState => this.formControl.setValue(formState.value));
+          ).subscribe(formState => {
+            if (formState) {
+              this.formControl.setValue(formState.value);
+            }
+          });
         }
       }
 
@@ -508,8 +516,8 @@ describe('Form integration', () => {
 
       it('should dispatch actions when personForm is being updated in view', () => {
         fixture.detectChanges();
-        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name');
-        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name');
+        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name') || raiseError(`Test DOM Element not found!`);
+        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name') || raiseError(`Test DOM Element not found!`);
 
         firstNameInput.value = 'Updated first name view';
         firstNameInput.dispatchEvent(new Event('input'));
@@ -727,11 +735,11 @@ describe('Form integration', () => {
         storeService.dispatch(new CreatePersonAction('First name', 'Last name'));
         fixture.detectChanges();
 
-        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name');
-        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name');
-        const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name');
+        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name') || raiseError(`Test DOM Element not found!`);
+        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name') || raiseError(`Test DOM Element not found!`);
+        const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name') || raiseError(`Test DOM Element not found!`);
 
-        expect(personName.textContent.trim()).toEqual('First name Last name');
+        expect((personName.textContent || '').trim()).toEqual('First name Last name');
         expect(firstNameInput.value).toEqual('First name');
         expect(lastNameInput.value).toEqual('Last name');
       });
@@ -950,11 +958,11 @@ describe('Form integration', () => {
         storeService.dispatch(new CreatePersonAction('First name', 'Last name'));
         fixture.detectChanges();
 
-        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name');
-        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name');
-        const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name');
+        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name') || raiseError(`Test DOM Element not found!`);
+        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name') || raiseError(`Test DOM Element not found!`);
+        const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name') || raiseError(`Test DOM Element not found!`);
 
-        expect(personName.textContent.trim()).toEqual('First name Last name');
+        expect((personName.textContent || '').trim()).toEqual('First name Last name');
         expect(firstNameInput.value).toEqual('First name');
         expect(lastNameInput.value).toEqual('Last name');
       });
@@ -1003,11 +1011,11 @@ describe('Form integration', () => {
         }]);
         fixture.detectChanges();
 
-        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name');
-        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name');
-        const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name');
+        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name') || raiseError(`Test DOM Element not found!`);
+        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name') || raiseError(`Test DOM Element not found!`);
+        const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name') || raiseError(`Test DOM Element not found!`);
 
-        expect(personName.textContent.trim()).toEqual('Changed first name Changed last name');
+        expect((personName.textContent || '').trim()).toEqual('Changed first name Changed last name');
         expect(firstNameInput.value).toEqual('Changed first name');
         expect(lastNameInput.value).toEqual('Changed last name');
       }));
@@ -1312,15 +1320,15 @@ describe('Form integration', () => {
         storeService.dispatch(new CreateMainPersonAction('Main first name', 'Main last name', 'first.last@main.com'));
         fixture.detectChanges();
 
-        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelectorAll('.first-name');
-        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelectorAll('.last-name');
-        const mainEmailInput: HTMLInputElement = fixture.nativeElement.querySelector('.email-address');
-        const personName: HTMLDivElement = fixture.nativeElement.querySelectorAll('.person-name');
+        const firstNameInput: HTMLInputElement[] = fixture.nativeElement.querySelectorAll('.first-name');
+        const lastNameInput: HTMLInputElement[] = fixture.nativeElement.querySelectorAll('.last-name');
+        const mainEmailInput: HTMLInputElement = fixture.nativeElement.querySelector('.email-address') || raiseError(`Test DOM Element not found!`);
+        const personName: HTMLDivElement[] = fixture.nativeElement.querySelectorAll('.person-name');
 
-        expect(personName[0].textContent.trim()).toEqual('Regular first name Regular last name');
+        expect((personName[0].textContent || '').trim()).toEqual('Regular first name Regular last name');
         expect(firstNameInput[0].value).toEqual('Regular first name');
         expect(lastNameInput[0].value).toEqual('Regular last name');
-        expect(personName[1].textContent.trim()).toEqual('Main first name Main last name');
+        expect((personName[1].textContent || '').trim()).toEqual('Main first name Main last name');
         expect(firstNameInput[1].value).toEqual('Main first name');
         expect(lastNameInput[1].value).toEqual('Main last name');
         expect(mainEmailInput.value).toEqual('first.last@main.com');

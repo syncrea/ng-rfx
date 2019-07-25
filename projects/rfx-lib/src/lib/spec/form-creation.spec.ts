@@ -3,7 +3,7 @@ import {createForm, pushFormGroupArrayItem} from '../forms/form-creation';
 
 export interface TestForm {
   name: string;
-  middleName: string;
+  middleName: string | null;
   age: number;
   colors: string[];
   children: {name: string, age: number}[];
@@ -11,7 +11,7 @@ export interface TestForm {
     street: string;
     no: number;
   };
-  favoriteNumber: number;
+  favoriteNumber: number | null;
 }
 
 const testFormDefinitionLong: FormDefinitionGroup<TestForm> = {

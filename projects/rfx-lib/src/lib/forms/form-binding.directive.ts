@@ -22,18 +22,15 @@ export class FormBindingDirective<F> implements OnInit, OnChanges, OnDestroy {
   @Input() rfxFormBindingFormDefinition?: FormDefinition<F>;
   @Input() rfxFormBindingOptions?: FormBindingDirectiveOptions<F>;
 
-  private viewRef: EmbeddedViewRef<FormBindingDirectiveContext<F>>;
-  private formDataSubscription: Subscription;
+  private viewRef?: EmbeddedViewRef<FormBindingDirectiveContext<F>>;
+  private formDataSubscription?: Subscription;
 
   constructor(private formRegistry: FormRegistryService,
               private templateRef: TemplateRef<FormBindingDirectiveContext<F>>,
               private viewContainerRef: ViewContainerRef) {}
 
   ngOnInit() {
-    this.viewRef = this.viewContainerRef.createEmbeddedView(this.templateRef, {
-      formControl: null,
-      formState: null
-    });
+    this.viewRef = this.viewContainerRef.createEmbeddedView(this.templateRef, <any>{});
     this.ensureValidForm();
     this.observeForm();
   }
@@ -63,18 +60,25 @@ export class FormBindingDirective<F> implements OnInit, OnChanges, OnDestroy {
       this.formDataSubscription.unsubscribe();
     }
 
-    this.formDataSubscription = this.formRegistry
-      .observeForm<F>(this.rfxFormBinding)
-      .subscribe(formData => {
-        this.viewRef.context.formState = formData.state;
-        this.viewRef.context.formControl = formData.control;
-        this.viewRef.markForCheck();
+    const formDataObservable = this.formRegistry
+      .observeForm<F>(this.rfxFormBinding);
+
+    if (formDataObservable) {
+      this.formDataSubscription = formDataObservable.subscribe(formData => {
+        if (this.viewRef) {
+          this.viewRef.context.formState = formData.state;
+          this.viewRef.context.formControl = formData.control;
+          this.viewRef.markForCheck();
+        }
       });
+    }
   }
 
   ngOnDestroy() {
-    this.formDataSubscription.unsubscribe();
-    if (this.rfxFormBindingOptions && this.rfxFormBindingOptions.removeFormOnDestroy) {
+    if (this.formDataSubscription) {
+      this.formDataSubscription.unsubscribe();
+    }
+    if (this.rfxFormBindingOptions && this.rfxFormBindingOptions.removeFormOnDestroy && this.rfxFormBinding) {
       this.formRegistry.removeForm(this.rfxFormBinding);
     }
   }

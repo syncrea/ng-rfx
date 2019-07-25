@@ -70,11 +70,11 @@ export class TypedFormControl<T> extends FormControl {
 
 type TypedFormGroupChildInternal<F, K extends keyof F> =
   F[K] extends PrimitiveType ? TypedFormControl<F[K]> :
-  F[K] extends any[] ? TypedFormArray<F[K][0]> : TypedFormGroup<F[K]>;
-type TypedFromGroupControlsInternal<F> = {[K in keyof F]: TypedFormGroupChildInternal<F, K>};
+  F[K] extends (infer E)[] ? TypedFormArray<E> : TypedFormGroup<F[K]>;
+type TypedFormGroupControlsInternal<F> = {[K in keyof F]: TypedFormGroupChildInternal<F, K>};
 
 export class TypedFormGroup<F> extends FormGroup {
-  constructor(controls?: TypedFromGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
+  constructor(controls: TypedFormGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
     super(controls, validatorOrOpts, asyncValidator);
   }
 
@@ -82,17 +82,13 @@ export class TypedFormGroup<F> extends FormGroup {
     return this.value;
   }
 
-  get typedControls(): TypedFromGroupControlsInternal<F> {
-    return <TypedFromGroupControlsInternal<F>>this.controls;
+  get typedControls(): TypedFormGroupControlsInternal<F> {
+    return <TypedFormGroupControlsInternal<F>>this.controls;
   }
 
   typedGet<K extends keyof F>(key: K): TypedFormGroupChildInternal<F, K> {
     const childControl = super.get(<string>key);
-    if (childControl instanceof TypedFormControl || childControl instanceof TypedFormGroup || childControl instanceof TypedFormArray) {
-      return <TypedFormGroupChildInternal<F, K>>childControl;
-    } else {
-      return null;
-    }
+    return <TypedFormGroupChildInternal<F, K>>childControl;
   }
 
   patchValue(value: Partial<F>, options?: {
@@ -154,7 +150,7 @@ export class TypedFormGroup<F> extends FormGroup {
 type TypedFormControlOrGroupArrayInternal<T> = T extends PrimitiveType ? TypedFormControl<T> : TypedFormGroup<T>;
 
 export class TypedFormArray<T> extends FormArray {
-  constructor(controls?: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
+  constructor(controls: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
     super(controls, validatorOrOpts, asyncValidator);
   }
 

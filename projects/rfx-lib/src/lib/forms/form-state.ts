@@ -20,7 +20,8 @@ export function extractStateBase(control: AbstractControl): FormStateControlBase
     untouched: control.untouched,
     valid: control.valid,
     disabled: control.disabled,
-    enabled: control.enabled
+    enabled: control.enabled,
+    errors: null
   };
 }
 
@@ -42,15 +43,17 @@ export function getFormState<F>(control: AbstractControl,
   return <FormState<F>>getFormStateRecursive(control, errorResolver || (() => null), errorPathPrefix ? [errorPathPrefix] : []);
 }
 
-function getFormStateRecursive(control: AbstractControl,
+function getFormStateRecursive<F>(control: AbstractControl,
                                errorResolver: ErrorMessageResolver,
-                               path: string[]): FormState<any> {
+                               path: string[]): FormState<F> {
   if (control instanceof FormGroup) {
-    return getFormGroupState(control, errorResolver, path);
+    return <any>getFormGroupState<F>(control, errorResolver, path);
   } else if (control instanceof FormArray) {
-    return getFormArrayState(control, errorResolver, path);
+    return <any>getFormArrayState<F>(control, errorResolver, path);
   } else if (control instanceof FormControl) {
-    return getFormControlState(control, errorResolver, path);
+    return <any>getFormControlState<F>(control, errorResolver, path);
+  } else {
+    throw new Error(`Unsupported form control type. Needs to be instance of FormGroup, FormArray or FormControl`);
   }
 }
 
@@ -61,10 +64,10 @@ export function getFormGroupState<F>(group: FormGroup, errorResolver: ErrorMessa
       name: key,
       state: getFormStateRecursive(group.controls[key], errorResolver, [...path, key])
     }))
-    .reduce((reducedFields: FormStateGroupFields<F>, entry) => {
+    .reduce((reducedFields, entry) => {
       reducedFields[entry.name] = entry.state;
       return reducedFields;
-    }, <FormStateGroupFields<F>>{});
+    }, <any>{});
 
   return {
     ...extractStateBase(group),
