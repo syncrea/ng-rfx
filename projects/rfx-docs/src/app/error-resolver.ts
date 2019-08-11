@@ -30,11 +30,11 @@ export function resolveErrors(errors: ValidationErrors,
         messages.push(resolvedMessage);
       }
       return messages;
-    }, []);
+    }, <string[]>[]);
 }
 
 export const errorResolver = (control: AbstractControl, controlPath: string[]) =>
-  resolveErrors(
+  !control.errors ? null : resolveErrors(
     control.errors,
     controlPath,
     allErrorMessages
