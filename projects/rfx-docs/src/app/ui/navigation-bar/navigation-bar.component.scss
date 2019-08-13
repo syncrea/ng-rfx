@@ -1,0 +1,30 @@
+@import '~@angular/material/theming';
+
+:host {
+  display: flex;
+  position: fixed;
+  width: 100%;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: map-get($mat-amber, 500);
+  z-index: 1000;
+
+  @media screen and (max-width: 600px) {
+    padding: 8px 0;
+  }
+}
+
+.logo {
+  height: 34px;
+  margin: 0 4px 3px 0;
+}
+
+.github-logo {
+  height: 26px;
+  margin: 0 4px 3px 0;
+}
+
+.version {
+  font-size: 14px;
+  margin-left: auto;
+}

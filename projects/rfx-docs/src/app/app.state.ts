@@ -1,13 +1,15 @@
-import {PersonEffects, personReducer, PersonState} from './dynamic-form/dynamic-form.state';
+export interface AppState {
+  version: string;
+}
+
+export function appReducer(state: AppState = {version: '1.0.0-rc11'}) {
+  return state;
+}
 
 export interface GlobalState {
-  personState: PersonState;
+  app: AppState;
 }
 
 export const globalReducers = {
-  personState: personReducer
+  app: appReducer
 };
-
-export const globalEffects = [
-  PersonEffects
-];

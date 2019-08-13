@@ -1,13 +1,12 @@
 import {Inject, Injectable, Optional} from '@angular/core';
 import {merge, Observable} from 'rxjs';
 import {distinctUntilChanged, map, startWith} from 'rxjs/operators';
-import {ErrorMessageResolver, FormData, FormDefinition, FormRegistryKey, InitialFormData, TypedFormControlType} from '../model';
+import {ErrorMessageResolver, FormData, FormDefinition, FormRegistryKey, InitialFormData, TypedFormControlType, TypedFormRegistryKey} from '../model';
 import {getFormState} from './form-state';
 import {RFX_ERROR_RESOLVER} from '../tokens';
 import {createForm} from './form-creation';
 import {deepEquals, normalizeKey, uuid} from '../helper';
 import {AbstractControl} from '@angular/forms';
-import { TypedFormRegistryKey } from 'dist/rfx-lib/ng-rfx';
 
 const defaultErrorResolver: ErrorMessageResolver = (control: AbstractControl, path: string[]) => control.errors ? Object.keys(control.errors) : null;
 

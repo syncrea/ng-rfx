@@ -1,7 +1,0 @@
-<rfx-dynamic-person *ngFor="let person of persons | async"
-                    [person]="person" (outDeletePerson)="deletePerson($event)">
-</rfx-dynamic-person>
-<button class="button-primary"
-        (click)="createMainPerson()">Add Main Person</button>
-<button class="button-primary"
-        (click)="createRegularPerson()">Add Regular Person</button>
