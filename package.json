@@ -13,7 +13,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "pub": "ng build --project rfx-lib && ng build --prod --project rfx-docs && npm run copy-readme && npm run gh-pub",
+    "pub": "ng test --watch=false --project rfx-lib && ng build --project rfx-lib && ng build --prod --project rfx-docs && npm run copy-readme && npm run gh-pub",
     "gh-pub": "node publish-gh-pages.js",
     "copy-readme": "cp README.md dist/rfx-lib"
   },
