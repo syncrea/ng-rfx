@@ -4,7 +4,7 @@ import {FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {merge, Observable, of} from 'rxjs';
 import {TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
 import {FormData, FormDefinition, FormDefinitionGroup, FormRegistryKey, FormStateGroup, FormStateControlBase} from '../model';
-import {FormRegistryService} from '../forms/form-registry.service';
+import {FormRegistry} from '../forms/form-registry.service';
 import {createForm} from '../forms/form-creation';
 import {Action, select, Store, StoreModule} from '@ngrx/store';
 import {filter, map, take, tap, skipWhile} from 'rxjs/operators';
@@ -14,7 +14,6 @@ import {uuid, raiseError} from '../helper';
 import {By} from '@angular/platform-browser';
 import {ReactiveFormsExtensionModule} from '../reactive-forms-extension.module';
 import Spy = jasmine.Spy;
-import {FormBindingDirective} from 'ng-rfx';
 
 describe('Form integration', () => {
   describe('typed personForm controls', () => {
@@ -130,7 +129,7 @@ describe('Form integration', () => {
       }
 
       let fixture: ComponentFixture<TestContainerComponent>;
-      let formRegistryService: FormRegistryService;
+      let formRegistryService: FormRegistry;
       let component: TestContainerComponent;
 
       beforeEach(() => {
@@ -146,7 +145,7 @@ describe('Form integration', () => {
         });
 
         fixture = TestBed.createComponent(TestContainerComponent);
-        formRegistryService = TestBed.get(FormRegistryService);
+        formRegistryService = TestBed.get(FormRegistry);
         component = fixture.componentInstance;
       });
 
@@ -252,14 +251,14 @@ describe('Form integration', () => {
       };
       formKey: FormRegistryKey<PersonForm>;
 
-      constructor(private formRegistry: FormRegistryService) {
+      constructor(private formRegistry: FormRegistry) {
         this.formKey = this.formRegistry.createAndRegisterForm(this.formDefinition);
       }
     }
 
     let fixture: ComponentFixture<TestContainerComponent>;
     let component: TestContainerComponent;
-    let formRegistryService: FormRegistryService;
+    let formRegistryService: FormRegistry;
     let formRegistryCreateAndRegisterSpy: Spy;
 
     beforeEach(() => {
@@ -270,7 +269,7 @@ describe('Form integration', () => {
           ReactiveFormsExtensionModule
         ],
         providers: [
-          FormRegistryService
+          FormRegistry
         ],
         declarations: [
           TestPersonFormComponent,
@@ -278,7 +277,7 @@ describe('Form integration', () => {
         ]
       });
 
-      formRegistryService = TestBed.get(FormRegistryService);
+      formRegistryService = TestBed.get(FormRegistry);
       formRegistryCreateAndRegisterSpy = spyOn(formRegistryService, 'createAndRegisterForm').and.callThrough();
       fixture = TestBed.createComponent(TestContainerComponent);
       component = fixture.componentInstance;
@@ -309,7 +308,7 @@ describe('Form integration', () => {
     it('should render initial state in view correctly', () => {
       fixture.detectChanges();
 
-      const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name') 
+      const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name')
         || raiseError(`Test DOM Element not found!`);
 
       expect((personName.textContent || '').trim()).toBe('Initial first name Initial last name');
@@ -623,7 +622,7 @@ describe('Form integration', () => {
             tap((action: DeletePersonAction) => this.formRegistry.removeForm(action.person.formKey))
           );
 
-        constructor(private actions: Actions, private formRegistry: FormRegistryService) {
+        constructor(private actions: Actions, private formRegistry: FormRegistry) {
         }
       }
 
@@ -694,7 +693,7 @@ describe('Form integration', () => {
       class TestContainerComponent {
         persons: Observable<Person[]>;
 
-        constructor(private store: Store<GlobalState>, private formRegister: FormRegistryService) {
+        constructor(private store: Store<GlobalState>, private formRegister: FormRegistry) {
           this.persons = store.pipe(
             select(state => Object.values(state.personState.persons)),
           );
@@ -717,7 +716,7 @@ describe('Form integration', () => {
             EffectsModule.forRoot([PersonEffects])
           ],
           providers: [
-            FormRegistryService
+            FormRegistry
           ],
           declarations: [
             TestPersonComponent,
@@ -848,7 +847,7 @@ describe('Form integration', () => {
             tap((action: DeletePersonAction) => this.formRegistry.removeForm(action.person.formKey))
           );
 
-        constructor(private actions: Actions, private formRegistry: FormRegistryService) {
+        constructor(private actions: Actions, private formRegistry: FormRegistry) {
         }
       }
 
@@ -927,7 +926,7 @@ describe('Form integration', () => {
       let fixture: ComponentFixture<TestContainerComponent>;
       let component: TestContainerComponent;
       let storeService: Store<GlobalState>;
-      let formRegistryService: FormRegistryService;
+      let formRegistryService: FormRegistry;
       let storeDispatchSpy: Spy;
 
       beforeEach(() => {
@@ -948,7 +947,7 @@ describe('Form integration', () => {
         });
 
         storeService = TestBed.get(Store);
-        formRegistryService = TestBed.get(FormRegistryService);
+        formRegistryService = TestBed.get(FormRegistry);
         storeDispatchSpy = spyOn(storeService, 'dispatch').and.callThrough();
         fixture = TestBed.createComponent(TestContainerComponent);
         component = fixture.componentInstance;
@@ -1186,7 +1185,7 @@ describe('Form integration', () => {
             tap((action: DeletePersonAction) => this.formRegistry.removeForm(action.person.formKey))
           );
 
-        constructor(private actions: Actions, private formRegistry: FormRegistryService) {
+        constructor(private actions: Actions, private formRegistry: FormRegistry) {
         }
       }
 

@@ -7,7 +7,7 @@ export interface ErrorMessages {
 
 export type ErrorMessageResolver = (control: AbstractControl, path: string[]) => string[] | null;
 
-export type PrimitiveType = string | number | boolean | null;
+export type PrimitiveType = string | number | boolean | undefined | null;
 
 export type FormDefinitionTypeLiteral = 'Field' | 'Group' | 'GroupArray' | 'PrimitiveArray';
 
@@ -89,14 +89,19 @@ export type FormState<F> =
     F extends (infer E)[] ? FormStateArray<E> :
       FormStateGroup<F>;
 
-export type TypedFormControlType<T> =
+export type TypedFormControlInfer<T> =
   T extends PrimitiveType ? TypedFormControl<T> :
     T extends (infer E)[] ? TypedFormArray<E> :
       TypedFormGroup<T>;
 
+/**
+ * @deprecated Use TypedFormControlInfer<T> instead. TypedFormControlType will be removed in the next major release.
+ */
+export type TypedFormControlType<T> = TypedFormControlInfer<T>;
+
 export interface FormData<T> {
   state: FormState<T>;
-  control: TypedFormControlType<T>;
+  control: TypedFormControlInfer<T>;
 }
 
 export interface TypedFormRegistryKey<T> {

@@ -1,7 +1,8 @@
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {FormBindingDirective} from './forms/form-binding.directive';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBindingDirective } from './forms/form-binding.directive';
+import { ObserveFormPipe } from './forms/observe-form.pipe';
 
 @NgModule({
   imports: [
@@ -10,10 +11,12 @@ import {FormBindingDirective} from './forms/form-binding.directive';
     ReactiveFormsModule
   ],
   declarations: [
-    FormBindingDirective
+    FormBindingDirective,
+    ObserveFormPipe
   ],
   exports: [
-    FormBindingDirective
+    FormBindingDirective,
+    ObserveFormPipe
   ]
 })
 export class ReactiveFormsExtensionModule {}

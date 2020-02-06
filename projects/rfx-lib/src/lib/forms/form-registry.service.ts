@@ -1,7 +1,7 @@
 import {Inject, Injectable, Optional} from '@angular/core';
 import {merge, Observable} from 'rxjs';
 import {distinctUntilChanged, map, startWith} from 'rxjs/operators';
-import {ErrorMessageResolver, FormData, FormDefinition, FormRegistryKey, InitialFormData, TypedFormControlType, TypedFormRegistryKey} from '../model';
+import {ErrorMessageResolver, FormData, FormDefinition, FormRegistryKey, InitialFormData, TypedFormRegistryKey, TypedFormControlInfer} from '../model';
 import {getFormState} from './form-state';
 import {RFX_ERROR_RESOLVER} from '../tokens';
 import {createForm} from './form-creation';
@@ -11,7 +11,7 @@ import {AbstractControl} from '@angular/forms';
 const defaultErrorResolver: ErrorMessageResolver = (control: AbstractControl, path: string[]) => control.errors ? Object.keys(control.errors) : null;
 
 export interface FormRegistryEntry<T> {
-  form: TypedFormControlType<T>;
+  form: TypedFormControlInfer<T>;
   formDefinition?: FormDefinition<T>;
 }
 
@@ -23,7 +23,7 @@ export interface FormCreationOptions<T> {
 @Injectable({
   providedIn: 'root'
 })
-export class FormRegistryService {
+export class FormRegistry {
   private forms: {[id: string]: FormRegistryEntry<any>} = {};
 
   constructor(@Inject(RFX_ERROR_RESOLVER) @Optional() private errorResolver?: ErrorMessageResolver) {}
@@ -54,7 +54,7 @@ export class FormRegistryService {
     return normalizedKey;
   }
 
-  registerForm<T>(form: TypedFormControlType<T>, key?: FormRegistryKey<T>): FormRegistryKey<T> {
+  registerForm<T>(form: TypedFormControlInfer<T>, key?: FormRegistryKey<T>): FormRegistryKey<T> {
     const existingOrNewKey = this.createOrNormalizeFormKey(key);
 
     this.forms[existingOrNewKey.id] = {
@@ -63,13 +63,13 @@ export class FormRegistryService {
     return existingOrNewKey;
   }
 
-  getForm<T>(key: FormRegistryKey<T>): TypedFormControlType<T> | null  {
+  getForm<T>(key: FormRegistryKey<T>): TypedFormControlInfer<T> | null  {
     key = normalizeKey(key);
     if (!key || !this.forms[key.id]) {
       return null;
     }
 
-    return <TypedFormControlType<T>>this.forms[key.id].form;
+    return <TypedFormControlInfer<T>>this.forms[key.id].form;
   }
 
   getFormData<T>(key: FormRegistryKey<T>): FormData<T> | null  {
@@ -79,7 +79,7 @@ export class FormRegistryService {
     }
 
     return {
-      control: <TypedFormControlType<T>>this.forms[key.id].form,
+      control: <TypedFormControlInfer<T>>this.forms[key.id].form,
       state: getFormState(this.forms[key.id].form)
     };
   }
@@ -106,7 +106,7 @@ export class FormRegistryService {
     }
 
     const entry = this.forms[normalizedKey.id];
-    const control = <TypedFormControlType<T>>entry.form;
+    const control = <TypedFormControlInfer<T>>entry.form;
     return merge(
       control.valueChanges.pipe(map(() => getFormState(control))),
       control.statusChanges.pipe(map(() => getFormState(control)))

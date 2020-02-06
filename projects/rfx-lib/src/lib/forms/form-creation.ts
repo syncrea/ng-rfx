@@ -4,7 +4,8 @@ import {
   FormDefinitionGroup,
   FormDefinitionGroupArray,
   FormDefinitionPrimitiveArray,
-  PrimitiveType, TypedFormControlType
+  PrimitiveType,
+  TypedFormControlInfer
 } from '../model';
 import {TypedFormArray, TypedFormControl, TypedFormGroup} from './typed-form-control';
 import {isPrimitiveListType, isPrimitiveType} from '../helper';
@@ -13,8 +14,8 @@ export function createForm<T extends PrimitiveType>(initialValue: T | FormDefini
 export function createForm<T extends PrimitiveType[]>(initialValue: T | FormDefinitionPrimitiveArray<T[0]>): TypedFormArray<T[0]>;
 export function createForm<T>(formDefinition: FormDefinitionGroupArray<T>): TypedFormArray<T>;
 export function createForm<T>(formDefinition: FormDefinitionGroup<T>): TypedFormGroup<T>;
-export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | PrimitiveType | PrimitiveType[]): TypedFormControlType<any>;
-export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | PrimitiveType | PrimitiveType[]): TypedFormControlType<any> {
+export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | PrimitiveType | PrimitiveType[]): TypedFormControlInfer<any>;
+export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | PrimitiveType | PrimitiveType[]): TypedFormControlInfer<any> {
   if (isPrimitiveType(formDefinitionOrInitialValue)) {
     return createForm({
       type: 'Field',

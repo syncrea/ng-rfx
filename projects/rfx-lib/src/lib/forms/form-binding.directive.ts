@@ -1,11 +1,11 @@
 import {Directive, EmbeddedViewRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef, ViewContainerRef} from '@angular/core';
 import {Subscription} from 'rxjs';
-import {FormDefinition, FormRegistryKey, FormState, InitialFormData, TypedFormControlType} from '../model';
-import {FormRegistryService} from './form-registry.service';
+import {FormDefinition, FormRegistryKey, FormState, InitialFormData, TypedFormControlInfer} from '../model';
+import {FormRegistry} from './form-registry.service';
 import {noRegisteredFormForKeyAndNoFormDefinition} from '../errors';
 
 export interface FormBindingDirectiveContext<T> {
-  formControl: TypedFormControlType<T>;
+  formControl: TypedFormControlInfer<T>;
   formState: FormState<T>;
 }
 
@@ -14,6 +14,9 @@ export interface FormBindingDirectiveOptions<T> {
   removeFormOnDestroy?: boolean;
 }
 
+/**
+ * @deprecated The use of this directive is not suggested anymore. Please use the pipes to extract form state or value from the FormRegistryService.
+ */
 @Directive({
   selector: '[rfxFormBinding]'
 })
@@ -25,7 +28,7 @@ export class FormBindingDirective<F> implements OnInit, OnChanges, OnDestroy {
   private viewRef?: EmbeddedViewRef<FormBindingDirectiveContext<F>>;
   private formDataSubscription?: Subscription;
 
-  constructor(private formRegistry: FormRegistryService,
+  constructor(private formRegistry: FormRegistry,
               private templateRef: TemplateRef<FormBindingDirectiveContext<F>>,
               private viewContainerRef: ViewContainerRef) {}
 

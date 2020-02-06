@@ -1,14 +1,14 @@
-import {Validators} from '@angular/forms';
+import { Validators } from '@angular/forms';
 import createSpy = jasmine.createSpy;
-import {FormDefinitionGroup, FormData} from '../model';
-import {createForm} from '../forms/form-creation';
-import {FormRegistryService} from '../forms/form-registry.service';
+import { FormDefinitionGroup, FormData } from '../model';
+import { createForm } from '../forms/form-creation';
+import { FormRegistry } from '../forms/form-registry.service';
 import { raiseError } from '../helper';
 
 describe('FormRegistryService', () => {
   describe('simple service tests', () => {
     it('should register custom personForm', () => {
-      const service = new FormRegistryService();
+      const service = new FormRegistry();
 
       interface SimpleForm {
         readonly firstName: string;
@@ -30,7 +30,7 @@ describe('FormRegistryService', () => {
     });
 
     it('should remove registered personForm', () => {
-      const service = new FormRegistryService();
+      const service = new FormRegistry();
 
       interface SimpleForm {
         readonly firstName: string;
@@ -52,7 +52,7 @@ describe('FormRegistryService', () => {
     });
 
     it('should create and register custom personForm', () => {
-      const service = new FormRegistryService();
+      const service = new FormRegistry();
 
       interface SimpleForm {
         readonly firstName: string;
@@ -83,7 +83,7 @@ describe('FormRegistryService', () => {
     });
 
     it('should emit personForm changes to observers', () => {
-      const service = new FormRegistryService();
+      const service = new FormRegistry();
 
       interface SimpleForm {
         readonly firstName: string;
