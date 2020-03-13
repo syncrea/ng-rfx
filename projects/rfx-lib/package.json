@@ -1,14 +1,14 @@
 {
   "name": "ng-rfx",
-  "version": "1.0.0-rc12",
+  "version": "1.0.0-rc13",
   "author": "Gion Kunz <gion@syncrea.ch>",
   "description": "A simple toolkit for Angular Reactive Forms, to build scalable, type-safe and dynamic forms.",
   "homepage": "https://syncrea.github.io/ng-rfx/",
   "repository": "github:syncrea/ng-rfx",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^8.2.0",
-    "@angular/core": "^8.2.0",
-    "@angular/forms": "^8.2.0"
+    "@angular/common": "^8.0.0 || ^9.0.0",
+    "@angular/core": "^8.0.0 || ^9.0.0",
+    "@angular/forms": "^8.0.0 || ^9.0.0"
   }
 }

@@ -2,6 +2,7 @@ import {PrimitiveType} from '../model';
 import {AbstractControlOptions, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {EventEmitter} from '@angular/core';
+import {map} from 'rxjs/operators';
 
 export class TypedFormControl<T> extends FormControl {
   constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
@@ -82,6 +83,10 @@ export class TypedFormGroup<F> extends FormGroup {
     return this.value;
   }
 
+  get typedRawValue(): F {
+    return this.getRawValue();
+  }
+
   get typedControls(): TypedFormGroupControlsInternal<F> {
     return <TypedFormGroupControlsInternal<F>>this.controls;
   }
@@ -120,6 +125,10 @@ export class TypedFormGroup<F> extends FormGroup {
     return this.valueChanges;
   }
 
+  get typedRawValueChanges(): Observable<F> {
+    return this.valueChanges.pipe(map(() => this.typedRawValue));
+  }
+
   private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
     if (opts.emitEvent !== false) {
       (<EventEmitter<any>>this.statusChanges).emit(this.status);
@@ -156,6 +165,10 @@ export class TypedFormArray<T> extends FormArray {
 
   get typedValue(): T[] {
     return this.value;
+  }
+
+  get typedRawValue(): T[] {
+    return this.getRawValue();
   }
 
   get typedControls(): TypedFormControlOrGroupArrayInternal<T>[] {
@@ -198,6 +211,10 @@ export class TypedFormArray<T> extends FormArray {
 
   get typedValueChanges(): Observable<T[]> {
     return this.valueChanges;
+  }
+
+  get typedRawValueChanges(): Observable<T[]> {
+    return this.valueChanges.pipe(map(() => this.typedRawValue));
   }
 
   private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
