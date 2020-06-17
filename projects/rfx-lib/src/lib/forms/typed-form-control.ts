@@ -1,16 +1,29 @@
-import {PrimitiveType} from '../model';
-import {AbstractControlOptions, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn} from '@angular/forms';
+import {PrimitiveType, FormDefinition, TypedFormControlBase} from '../model';
+import {AbstractControlOptions, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn, ValidationErrors} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {EventEmitter} from '@angular/core';
 import {map} from 'rxjs/operators';
+import { extractErrorsWithAliasPrefix } from '../helper';
 
-export class TypedFormControl<T> extends FormControl {
-  constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
+export class TypedFormControl<T> extends FormControl implements TypedFormControlBase {
+  constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<T>) {
     super(formState, validatorOrOpts, asyncValidator);
   }
 
   get typedValue(): T {
     return this.value;
+  }
+
+  get typedValueChanges(): Observable<T> {
+    return this.valueChanges;
+  }
+
+  get errorsWithAliasPath(): ValidationErrors | null {
+    return extractErrorsWithAliasPrefix(this);
+  }
+
+  get parentTypedControl(): TypedFormControlBase {
+    return this.parent as unknown as TypedFormControlBase;
   }
 
   patchValue(value: T, options?: {
@@ -36,10 +49,6 @@ export class TypedFormControl<T> extends FormControl {
     emitEvent?: boolean;
   }): void {
     super.reset(formState, options);
-  }
-
-  get typedValueChanges(): Observable<T> {
-    return this.valueChanges;
   }
 
   private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
@@ -74,8 +83,8 @@ type TypedFormGroupChildInternal<F, K extends keyof F> =
   F[K] extends (infer E)[] ? TypedFormArray<E> : TypedFormGroup<F[K]>;
 type TypedFormGroupControlsInternal<F> = {[K in keyof F]: TypedFormGroupChildInternal<F, K>};
 
-export class TypedFormGroup<F> extends FormGroup {
-  constructor(controls: TypedFormGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
+export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase {
+  constructor(controls: TypedFormGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<F>) {
     super(controls, validatorOrOpts, asyncValidator);
   }
 
@@ -87,13 +96,34 @@ export class TypedFormGroup<F> extends FormGroup {
     return this.getRawValue();
   }
 
+  get typedValueChanges(): Observable<F> {
+    return this.valueChanges;
+  }
+
+  get typedRawValueChanges(): Observable<F> {
+    return this.valueChanges.pipe(map(() => this.typedRawValue));
+  }
+
   get typedControls(): TypedFormGroupControlsInternal<F> {
     return <TypedFormGroupControlsInternal<F>>this.controls;
+  }
+
+  get errorsWithAliasPath(): ValidationErrors | null {
+    return extractErrorsWithAliasPrefix(this);
+  }
+
+  get parentTypedControl(): TypedFormControlBase {
+    return this.parent as unknown as TypedFormControlBase;
   }
 
   typedGet<K extends keyof F>(key: K): TypedFormGroupChildInternal<F, K> {
     const childControl = super.get(<string>key);
     return <TypedFormGroupChildInternal<F, K>>childControl;
+  }
+
+  typedGetCustomField<K extends keyof F>(key: K): TypedFormControl<F[K]> {
+    const childControl = super.get(<string>key);
+    return <TypedFormControl<F[K]>>childControl;
   }
 
   patchValue(value: Partial<F>, options?: {
@@ -119,14 +149,6 @@ export class TypedFormGroup<F> extends FormGroup {
     emitEvent?: boolean;
   }): void {
     super.reset(formState, options);
-  }
-
-  get typedValueChanges(): Observable<F> {
-    return this.valueChanges;
-  }
-
-  get typedRawValueChanges(): Observable<F> {
-    return this.valueChanges.pipe(map(() => this.typedRawValue));
   }
 
   private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
@@ -158,8 +180,8 @@ export class TypedFormGroup<F> extends FormGroup {
 
 type TypedFormControlOrGroupArrayInternal<T> = T extends PrimitiveType ? TypedFormControl<T> : TypedFormGroup<T>;
 
-export class TypedFormArray<T> extends FormArray {
-  constructor(controls: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null) {
+export class TypedFormArray<T> extends FormArray implements TypedFormControlBase {
+  constructor(controls: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<T>) {
     super(controls, validatorOrOpts, asyncValidator);
   }
 
@@ -175,6 +197,22 @@ export class TypedFormArray<T> extends FormArray {
     return <TypedFormControlOrGroupArrayInternal<T>[]>this.controls;
   }
 
+  get typedValueChanges(): Observable<T[]> {
+    return this.valueChanges;
+  }
+
+  get typedRawValueChanges(): Observable<T[]> {
+    return this.valueChanges.pipe(map(() => this.typedRawValue));
+  }
+
+  get errorsWithAliasPath(): ValidationErrors | null {
+    return extractErrorsWithAliasPrefix(this);
+  }
+
+  get parentTypedControl(): TypedFormControlBase {
+    return this.parent as unknown as TypedFormControlBase;
+  }
+
   typedAt(index: number): TypedFormControlOrGroupArrayInternal<T> | null {
     const childControl = super.at(index);
     if (childControl instanceof TypedFormControl || childControl instanceof TypedFormGroup) {
@@ -182,6 +220,10 @@ export class TypedFormArray<T> extends FormArray {
     } else {
       return null;
     }
+  }
+
+  typedAtCustomField(index: number): TypedFormControl<T> | null {
+    return <any>this.typedAt(index);
   }
 
   patchValue(value: T[], options?: {
@@ -207,14 +249,6 @@ export class TypedFormArray<T> extends FormArray {
     emitEvent?: boolean;
   }): void {
     super.reset(formState, options);
-  }
-
-  get typedValueChanges(): Observable<T[]> {
-    return this.valueChanges;
-  }
-
-  get typedRawValueChanges(): Observable<T[]> {
-    return this.valueChanges.pipe(map(() => this.typedRawValue));
   }
 
   private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {

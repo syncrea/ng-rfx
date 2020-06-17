@@ -1,6 +1,6 @@
 import { Validators } from '@angular/forms';
 import createSpy = jasmine.createSpy;
-import { FormDefinitionGroup, FormData } from '../model';
+import { FormDefinitionGroup } from '../model';
 import { createForm } from '../forms/form-creation';
 import { FormRegistry } from '../forms/form-registry.service';
 import { raiseError } from '../helper';
@@ -119,11 +119,11 @@ describe('FormRegistryService', () => {
 
       expect(subscriptionSpy).toHaveBeenCalledTimes(2);
       // Initial call was with initial personForm description values (empty strings)
-      expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(0)[0]).state.fields.firstName.value).toBe('');
-      expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(0)[0]).state.fields.lastName.value).toBe('');
+      expect((<SimpleForm>subscriptionSpy.calls.argsFor(0)[0]).firstName).toBe('');
+      expect((<SimpleForm>subscriptionSpy.calls.argsFor(0)[0]).lastName).toBe('');
       // Second call is from the updated form data
-      expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(1)[0]).state.fields.firstName.value).toBe('First name');
-      expect((<FormData<SimpleForm>>subscriptionSpy.calls.argsFor(1)[0]).state.fields.lastName.value).toBe('Last name');
+      expect((<SimpleForm>subscriptionSpy.calls.argsFor(1)[0]).firstName).toBe('First name');
+      expect((<SimpleForm>subscriptionSpy.calls.argsFor(1)[0]).lastName).toBe('Last name');
     });
   });
 });

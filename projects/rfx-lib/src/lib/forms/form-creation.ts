@@ -26,20 +26,20 @@ export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | 
       type: 'PrimitiveArray',
       initialValue: formDefinitionOrInitialValue
     });
-  } else if (formDefinitionOrInitialValue.type === 'Field') {
-    return new TypedFormControl(formDefinitionOrInitialValue.initialValue, formDefinitionOrInitialValue.options);
+  } else if (formDefinitionOrInitialValue.type === 'Field' || formDefinitionOrInitialValue.type === 'CustomField') {
+    return new TypedFormControl(formDefinitionOrInitialValue.initialValue, formDefinitionOrInitialValue.options, undefined, !isPrimitiveType(formDefinitionOrInitialValue) ? formDefinitionOrInitialValue : undefined);
   } else if (formDefinitionOrInitialValue.type === 'Group') {
     const controls = Object.keys(formDefinitionOrInitialValue.fields).reduce((fieldControls, fieldName) => {
       fieldControls[fieldName] = createForm((<any>formDefinitionOrInitialValue.fields)[fieldName]);
       return fieldControls;
     }, <any>{});
-    return new TypedFormGroup(controls, formDefinitionOrInitialValue.options);
+    return new TypedFormGroup(controls, formDefinitionOrInitialValue.options, undefined, formDefinitionOrInitialValue);
   } else if (formDefinitionOrInitialValue.type === 'PrimitiveArray') {
     const controls = (formDefinitionOrInitialValue.initialValue || []).map(initialValue => createForm(<any>initialValue));
-    return new TypedFormArray(controls, formDefinitionOrInitialValue.options);
+    return new TypedFormArray(controls, formDefinitionOrInitialValue.options, undefined, !isPrimitiveListType(formDefinitionOrInitialValue) ? formDefinitionOrInitialValue : undefined);
   } else if (formDefinitionOrInitialValue.type === 'GroupArray') {
     const controls = Array.from({length: formDefinitionOrInitialValue.initialItems || 0}).map(() => createForm(formDefinitionOrInitialValue.group));
-    return new TypedFormArray(<any>controls, formDefinitionOrInitialValue.options);
+    return new TypedFormArray(<any>controls, formDefinitionOrInitialValue.options, undefined, formDefinitionOrInitialValue);
   } else {
     throw new Error(`Invalid form definition or initial value ${formDefinitionOrInitialValue}`);
   }

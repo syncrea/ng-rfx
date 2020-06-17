@@ -3,12 +3,11 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {merge, Observable, of} from 'rxjs';
 import {TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
-import {FormData, FormDefinition, FormDefinitionGroup, FormRegistryKey, FormStateGroup, FormStateControlBase} from '../model';
+import {FormDefinition, FormDefinitionGroup, FormRegistryKey} from '../model';
 import {FormRegistry} from '../forms/form-registry.service';
 import {createForm} from '../forms/form-creation';
 import {Action, select, Store, StoreModule} from '@ngrx/store';
-import {filter, map, take, tap, skipWhile} from 'rxjs/operators';
-import {getFormState} from '../forms/form-state';
+import {filter, map, take, tap} from 'rxjs/operators';
 import {Actions, Effect, EffectsModule} from '@ngrx/effects';
 import {uuid, raiseError} from '../helper';
 import {By} from '@angular/platform-browser';
@@ -104,8 +103,8 @@ describe('Form integration', () => {
         template: `
           <div>
             <input type="text" class="first-name" [formControl]="form.typedGet('firstName')">
-            <div class="first-name-errors" *ngIf="state.fields.firstName.touched && state.fields.firstName.errors">
-              {{state.fields.firstName.errors}}
+            <div class="first-name-errors" *ngIf="form.typedGet('firstName').touched && form.typedGet('firstName').errors">
+              {{form.typedGet('firstName').errors | json}}
             </div>
             <input type="text" class="last-name" [formControl]="form.typedGet('lastName')">
           </div>
@@ -113,19 +112,16 @@ describe('Form integration', () => {
       })
       class TestComponent {
         @Input() form: TypedFormGroup<SimpleForm>;
-        @Input() state: FormStateGroup<SimpleForm>;
       }
 
       @Component({
         selector: 'rfx-test-container',
         template: `
-          <rfx-test [form]="(form | async).control"
-                     [state]="(form | async).state">
-          </rfx-test>
+          <rfx-test [form]="form"></rfx-test>
         `
       })
       class TestContainerComponent {
-        form: Observable<FormData<SimpleForm>>;
+        form: TypedFormGroup<SimpleForm>;
       }
 
       let fixture: ComponentFixture<TestContainerComponent>;
@@ -150,7 +146,7 @@ describe('Form integration', () => {
       });
 
       it('should reflect initial values into input fields', () => {
-        const simpleFormDefinition: FormDefinitionGroup<SimpleForm> = {
+        const simpleFormDefinition: FormDefinition<SimpleForm> = {
           type: 'Group',
           fields: {
             firstName: 'Initial first name',
@@ -160,7 +156,7 @@ describe('Form integration', () => {
 
         const form = createForm(simpleFormDefinition);
         const formKey = formRegistryService.registerForm(form);
-        component.form = formRegistryService.observeForm(formKey) || raiseError(`Form observable needs to be set!`);
+        component.form = formRegistryService.getForm(formKey) || raiseError(`Form observable needs to be set!`);
 
         fixture.detectChanges();
 
@@ -188,7 +184,7 @@ describe('Form integration', () => {
 
         const form = createForm(simpleFormDefinition);
         const formKey = formRegistryService.registerForm(form);
-        component.form = formRegistryService.observeForm(formKey) || raiseError(`Form observable needs to be set!`);
+        component.form = formRegistryService.getForm(formKey) || raiseError(`Form observable needs to be set!`);
 
         form.patchValue({
           firstName: ''
@@ -201,12 +197,12 @@ describe('Form integration', () => {
 
         expect(form.typedGet('firstName').typedValue).toBe('');
         expect(form.typedGet('lastName').typedValue).toBe('Initial last name');
-        expect((errorsElement.textContent || '').trim()).toBe('required');
+        expect(JSON.parse(errorsElement.textContent || '{}')).toEqual({required: true});
       });
     });
   });
 
-  describe('form binding directive', () => {
+  describe('observe form pipe in view', () => {
     interface PersonForm {
       firstName: string;
       lastName: string;
@@ -215,18 +211,17 @@ describe('Form integration', () => {
     @Component({
       selector: 'rfx-test-person-form',
       template: `
-        <div
-          *rfxFormBinding="formKey; let control = formControl; let state = formState">
-          <div class="person-name">{{state.value.firstName}} {{state.value.lastName}}</div>
-          <input type="text" class="first-name" [formControl]="control.typedGet('firstName')">
+        <div *ngIf="formKey | observeForm as control">
+          <div class="person-name">{{control.typedValue.firstName}} {{control.typedValue.lastName}}</div>
+          <input type="text" class="first-name" [formControl]="control.typedControls.firstName">
           <div class="first-name-errors"
-               *ngIf="state.fields.firstName.touched && state.fields.firstName.errors">
-            {{state.fields.firstName.errors}}
+               *ngIf="control.typedControls.firstName.touched && control.typedControls.firstName.errors">
+            {{control.typedControls.firstName.errors | json}}
           </div>
-          <input type="text" class="last-name" [formControl]="control.typedGet('lastName')">
+          <input type="text" class="last-name" [formControl]="control.typedControls.lastName">
           <div class="last-name-errors"
-               *ngIf="state.fields.lastName.touched && state.fields.lastName.errors">
-            {{state.fields.lastName.errors}}
+               *ngIf="control.typedControls.lastName.touched && control.typedControls.lastName.errors">
+            {{control.typedControls.lastName.errors | json}}
           </div>
         </div>
       `
@@ -330,210 +325,7 @@ describe('Form integration', () => {
   });
 
   describe('ngrx integration tests', () => {
-    describe('container and pure components observing personForm with personForm bindings', () => {
-      interface SimpleForm {
-        firstName: string;
-        lastName: string;
-      }
-
-      const simpleFormDefinition: FormDefinitionGroup<SimpleForm> = {
-        type: 'Group',
-        fields: {
-          firstName: 'Initial first name',
-          lastName: 'Initial last name'
-        }
-      };
-
-      interface TestState {
-        form: FormStateGroup<SimpleForm> | null;
-      }
-
-      interface GlobalState {
-        test: TestState;
-      }
-
-      const initialFormStateProperties: FormStateControlBase = {
-        dirty: false,
-        disabled: false,
-        enabled: true,
-        invalid: false,
-        pristine: true,
-        touched: false,
-        untouched: true,
-        valid: true,
-        pending: false,
-        errors: null
-      };
-
-      const defaultFormState: TestState = {
-        form: {
-          value: {
-            firstName: 'Initial personEditFormState first name',
-            lastName: 'Initial personEditFormState last name'
-          },
-          ...initialFormStateProperties,
-          fields: {
-            firstName: {
-              value: 'Initial personEditFormState first name',
-              ...initialFormStateProperties
-            },
-            lastName: {
-              value: 'Initial personEditFormState last name',
-              ...initialFormStateProperties
-            }
-          }
-        }
-      };
-
-      class UpdateTestFormAction implements Action {
-        readonly type = 'UpdateTestFormAction';
-
-        constructor(public readonly formState: FormStateGroup<SimpleForm>) {
-        }
-      }
-
-      function testReducer(state: TestState = defaultFormState, action: UpdateTestFormAction): TestState {
-        switch (action.type) {
-          case 'UpdateTestFormAction': {
-            return {
-              form: action.formState
-            };
-          }
-          default:
-            return state;
-        }
-      }
-
-      @Component({
-        selector: 'rfx-test',
-        template: `
-          <div>
-            <input type="text" class="first-name" [formControl]="form.typedGet('firstName')">
-            <div class="first-name-errors" *ngIf="state.fields?.firstName.touched && state.fields?.firstName.errors">
-              {{state.fields.firstName.errors}}
-            </div>
-            <input type="text" class="last-name" [formControl]="form.typedGet('lastName')">
-            <div class="last-name-errors" *ngIf="state.fields?.lastName.touched && state.fields?.lastName.errors">
-              {{state.fields.lastName.errors}}
-            </div>
-          </div>
-        `
-      })
-      class TestComponent {
-        @Input() form: TypedFormGroup<SimpleForm>;
-        @Input() state: FormStateGroup<SimpleForm>;
-      }
-
-      @Component({
-        selector: 'rfx-test-container',
-        template: `
-          <rfx-test *ngIf="formState | async"
-                     [form]="formControl"
-                     [state]="formState | async">
-          </rfx-test>
-        `
-      })
-      class TestContainerComponent {
-        formControl: TypedFormGroup<SimpleForm>;
-        formState: Observable<FormStateGroup<SimpleForm> | null>;
-
-        constructor(private store: Store<GlobalState>) {
-          this.formControl = createForm(simpleFormDefinition);
-
-          // Select personEditFormState from store
-          this.formState = this.store.pipe(
-            select(state => state.test.form)
-          );
-
-          // Observe personForm control and dispatch action to change store personEditFormState on changes
-          merge(
-            this.formControl.valueChanges,
-            this.formControl.statusChanges
-          ).subscribe(() => this.store.dispatch(new UpdateTestFormAction(getFormState(this.formControl))));
-
-          // Initialize from group control with initial data from personEditFormState
-          this.formState.pipe(
-            take(1)
-          ).subscribe(formState => {
-            if (formState) {
-              this.formControl.setValue(formState.value);
-            }
-          });
-        }
-      }
-
-      let fixture: ComponentFixture<TestContainerComponent>;
-      let component: TestContainerComponent;
-      let storeService: Store<GlobalState>;
-      let storeDispatchSpy: Spy;
-
-      beforeEach(() => {
-        TestBed.configureTestingModule({
-          imports: [
-            FormsModule,
-            ReactiveFormsModule,
-            StoreModule.forRoot({
-              test: testReducer
-            })
-          ],
-          declarations: [
-            TestComponent,
-            TestContainerComponent
-          ]
-        });
-
-        storeService = TestBed.get(Store);
-        storeDispatchSpy = spyOn(storeService, 'dispatch').and.callThrough();
-        fixture = TestBed.createComponent(TestContainerComponent);
-        component = fixture.componentInstance;
-      });
-
-      it('should dispatch actions to store for initialization', () => {
-        // Value change and status both dispatch an action
-        expect(storeDispatchSpy).toHaveBeenCalledTimes(2);
-        const action: UpdateTestFormAction = storeDispatchSpy.calls.mostRecent().args[0];
-        expect(action.formState.value).toEqual({
-          firstName: 'Initial personEditFormState first name',
-          lastName: 'Initial personEditFormState last name'
-        });
-      });
-
-      it('should dispatch actions when personForm is being updated programmatically', () => {
-        component.formControl.setValue({
-          firstName: 'Updated first name',
-          lastName: 'Updated last name'
-        });
-
-        // Value change and status both dispatch an action as well as the update 2 actions so total of 4
-        expect(storeDispatchSpy).toHaveBeenCalledTimes(4);
-        const action: UpdateTestFormAction = storeDispatchSpy.calls.mostRecent().args[0];
-        expect(action.formState.value).toEqual({
-          firstName: 'Updated first name',
-          lastName: 'Updated last name'
-        });
-      });
-
-      it('should dispatch actions when personForm is being updated in view', () => {
-        fixture.detectChanges();
-        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name') || raiseError(`Test DOM Element not found!`);
-        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name') || raiseError(`Test DOM Element not found!`);
-
-        firstNameInput.value = 'Updated first name view';
-        firstNameInput.dispatchEvent(new Event('input'));
-        lastNameInput.value = 'Updated last name view';
-        lastNameInput.dispatchEvent(new Event('input'));
-
-        // 2 initial + 2 first name change + 2 last name change (always separate value + status changes) + 2 dirty
-        expect(storeDispatchSpy).toHaveBeenCalledTimes(8);
-        const action: UpdateTestFormAction = storeDispatchSpy.calls.mostRecent().args[0];
-        expect(action.formState.value).toEqual({
-          firstName: 'Updated first name view',
-          lastName: 'Updated last name view'
-        });
-      });
-    });
-
-    describe('with personForm registry and personForm key references', () => {
+    describe('with observeForm pipe and form key in ngrx store', () => {
       interface PersonForm {
         firstName: string;
         lastName: string;
@@ -659,243 +451,18 @@ describe('Form integration', () => {
       @Component({
         selector: 'rfx-test-person',
         template: `
-          <div>
+          <div *ngIf="person.formKey | observeForm as control">
             <div class="person-name">{{person.firstName}} {{person.lastName}}</div>
             <div class="edit-form">
-              <input type="text" class="first-name" [formControl]="formData.control.typedGet('firstName')">
+              <input type="text" class="first-name" [formControl]="control.typedControls.firstName">
               <div class="first-name-errors"
-                   *ngIf="formData.state.fields.firstName.touched && formData.state.fields.firstName.errors">
-                {{formData.state.fields.firstName.errors}}
+                   *ngIf="control.typedControls.firstName.touched && control.typedControls.firstName.errors">
+                {{control.typedControls.firstName.errors}}
               </div>
-              <input type="text" class="last-name" [formControl]="formData.control.typedGet('lastName')">
+              <input type="text" class="last-name" [formControl]="control.typedControls.lastName">
               <div class="last-name-errors"
-                   *ngIf="formData.state.fields.lastName.touched && formData.state.fields.lastName.errors">
-                {{formData.state.fields.lastName.errors}}
-              </div>
-            </div>
-          </div>
-        `
-      })
-      class TestPersonComponent {
-        @Input() person: Person;
-        @Input() formData: FormData<PersonForm>;
-      }
-
-      @Component({
-        selector: 'rfx-test-container',
-        template: `
-          <rfx-test-person *ngFor="let person of persons | async"
-                            [person]="person"
-                            [formData]="formRegister.observeForm(person.formKey) | async">
-          </rfx-test-person>
-        `
-      })
-      class TestContainerComponent {
-        persons: Observable<Person[]>;
-
-        constructor(private store: Store<GlobalState>, private formRegister: FormRegistry) {
-          this.persons = store.pipe(
-            select(state => Object.values(state.personState.persons)),
-          );
-        }
-      }
-
-      let fixture: ComponentFixture<TestContainerComponent>;
-      let component: TestContainerComponent;
-      let storeService: Store<GlobalState>;
-      let storeDispatchSpy: Spy;
-
-      beforeEach(() => {
-        TestBed.configureTestingModule({
-          imports: [
-            FormsModule,
-            ReactiveFormsModule,
-            StoreModule.forRoot({
-              personState: personReducer
-            }),
-            EffectsModule.forRoot([PersonEffects])
-          ],
-          providers: [
-            FormRegistry
-          ],
-          declarations: [
-            TestPersonComponent,
-            TestContainerComponent
-          ]
-        });
-
-        storeService = TestBed.get(Store);
-        storeDispatchSpy = spyOn(storeService, 'dispatch').and.callThrough();
-        fixture = TestBed.createComponent(TestContainerComponent);
-        component = fixture.componentInstance;
-      });
-
-      it('should create person with person form correctly', () => {
-        storeService.dispatch(new CreatePersonAction('First name', 'Last name'));
-        fixture.detectChanges();
-
-        const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.first-name') || raiseError(`Test DOM Element not found!`);
-        const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('.last-name') || raiseError(`Test DOM Element not found!`);
-        const personName: HTMLDivElement = fixture.nativeElement.querySelector('.person-name') || raiseError(`Test DOM Element not found!`);
-
-        expect((personName.textContent || '').trim()).toEqual('First name Last name');
-        expect(firstNameInput.value).toEqual('First name');
-        expect(lastNameInput.value).toEqual('Last name');
-      });
-
-      it('should delete person with person form correctly', async(() => {
-        storeService.dispatch(new CreatePersonAction('First name', 'Last name'));
-        fixture.detectChanges();
-
-        expect(fixture.debugElement.query(By.directive(TestPersonComponent))).toBeDefined();
-
-        component.persons.pipe(take(1)).subscribe(persons => {
-          storeService.dispatch(new DeletePersonAction(persons[0]));
-          fixture.detectChanges();
-
-          expect(fixture.debugElement.query(By.directive(TestPersonComponent))).toBeNull();
-        });
-      }));
-    });
-
-    describe('with form binding directive and form key in ngrx store', () => {
-      interface PersonForm {
-        firstName: string;
-        lastName: string;
-      }
-
-      const personFormDefinition: FormDefinitionGroup<PersonForm> = {
-        type: 'Group',
-        fields: {
-          firstName: 'Initial first name',
-          lastName: 'Initial last name'
-        }
-      };
-
-      interface Person {
-        id: string;
-        firstName: string;
-        lastName: string;
-        formKey: FormRegistryKey<PersonForm>;
-      }
-
-      interface PersonState {
-        persons: { [personId: string]: Person };
-      }
-
-      interface GlobalState {
-        personState: PersonState;
-      }
-
-      const defaultFormState: PersonState = {
-        persons: {}
-      };
-
-      class CreatePersonAction implements Action {
-        readonly type = 'CreatePersonAction';
-
-        constructor(public readonly firstName: string,
-                    public readonly lastName: string) {
-        }
-      }
-
-      class DeletePersonAction implements Action {
-        readonly type = 'DeletePersonAction';
-
-        constructor(public readonly person: Person) {
-        }
-      }
-
-      class UpdatePersonAction implements Action {
-        readonly type = 'UpdatePersonAction';
-
-        constructor(public readonly id: string,
-                    public readonly firstName: string,
-                    public readonly lastName: string,
-                    public readonly formKey: FormRegistryKey<PersonForm>) {
-        }
-      }
-
-      type PersonActions = UpdatePersonAction | DeletePersonAction | CreatePersonAction;
-
-      @Injectable()
-      class PersonEffects {
-        @Effect() addPerson: Observable<UpdatePersonAction> = this.actions
-          .pipe(
-            filter(action => action instanceof CreatePersonAction),
-            map((action: CreatePersonAction) => {
-              const {firstName, lastName} = action;
-              return <UpdatePersonAction>{
-                type: 'UpdatePersonAction',
-                id: uuid(),
-                firstName,
-                lastName,
-                formKey: this.formRegistry.createAndRegisterForm(personFormDefinition, {
-                  key: uuid(),
-                  initialData: {
-                    firstName,
-                    lastName
-                  }
-                })
-              };
-            })
-          );
-
-        @Effect({dispatch: false}) deletePerson = this.actions
-          .pipe(
-            filter(action => action instanceof DeletePersonAction),
-            tap((action: DeletePersonAction) => this.formRegistry.removeForm(action.person.formKey))
-          );
-
-        constructor(private actions: Actions, private formRegistry: FormRegistry) {
-        }
-      }
-
-      function personReducer(state: PersonState = defaultFormState, action: PersonActions): PersonState {
-        switch (action.type) {
-          case 'UpdatePersonAction': {
-            return {
-              ...state,
-              persons: {
-                ...state.persons,
-                [action.id]: {
-                  ...state.persons[action.id],
-                  id: action.id,
-                  firstName: action.firstName,
-                  lastName: action.lastName,
-                  formKey: action.formKey
-                }
-              }
-            };
-          }
-          case 'DeletePersonAction': {
-            const persons = {...state.persons};
-            delete persons[action.person.id];
-            return {
-              ...state,
-              persons
-            };
-          }
-          default:
-            return state;
-        }
-      }
-
-      @Component({
-        selector: 'rfx-test-person',
-        template: `
-          <div *rfxFormBinding="person.formKey; let control = formControl; let state = formState">
-            <div class="person-name">{{person.firstName}} {{person.lastName}}</div>
-            <div class="edit-form">
-              <input type="text" class="first-name" [formControl]="control.typedGet('firstName')">
-              <div class="first-name-errors"
-                   *ngIf="state.fields.firstName.touched && state.fields.firstName.errors">
-                {{state.fields.firstName.errors}}
-              </div>
-              <input type="text" class="last-name" [formControl]="control.typedGet('lastName')">
-              <div class="last-name-errors"
-                   *ngIf="state.fields.lastName.touched && state.fields.lastName.errors">
-                {{state.fields.lastName.errors}}
+                   *ngIf="control.typedControls.lastName.touched && control.typedControls.lastName.errors">
+                {{control.typedControls.lastName.errors}}
               </div>
             </div>
           </div>
@@ -1020,7 +587,7 @@ describe('Form integration', () => {
       }));
     });
 
-    describe('highly dynamic forms with binding directive and ngrx store', () => {
+    describe('highly dynamic forms with observeForm pipe and ngrx store', () => {
       type PersonType = 'Regular' | 'Main';
 
       interface RegularPersonForm {
@@ -1240,24 +807,24 @@ describe('Form integration', () => {
       @Component({
         selector: 'rfx-test-person',
         template: `
-          <div *rfxFormBinding="person.formKey; let control = formControl; let state = formState">
-            <div class="person-name">{{person.firstName}} {{person.lastName}}</div>
+          <div *ngIf="person.formKey | observeForm as control">
+            <div class="person-name">{{control.typedValue.firstName}} {{control.typedValue.lastName}}</div>
             <div class="edit-form">
-              <input type="text" class="first-name" [formControl]="control.typedGet('firstName')">
+              <input type="text" class="first-name" [formControl]="control.typedControls.firstName">
               <div class="first-name-errors"
-                   *ngIf="state.fields.firstName.touched && state.fields.firstName.errors">
-                {{state.fields.firstName.errors}}
+                   *ngIf="control.typedControls.firstName.touched && control.typedControls.firstName.errors">
+                {{control.typedControls.firstName.errors}}
               </div>
-              <input type="text" class="last-name" [formControl]="control.typedGet('lastName')">
+              <input type="text" class="last-name" [formControl]="control.typedControls.lastName">
               <div class="last-name-errors"
-                   *ngIf="state.fields.lastName.touched && state.fields.lastName.errors">
-                {{state.fields.lastName.errors}}
+                   *ngIf="control.typedControls.lastName.touched && control.typedControls.lastName.errors">
+                {{control.typedControls.lastName.errors}}
               </div>
               <ng-container *ngIf="person.type === 'Main'">
-                <input type="text" class="email-address" [formControl]="control.typedGet('emailAddress')">
+                <input type="text" class="email-address" [formControl]="control.typedControls.emailAddress">
                 <div class="email-address-errors"
-                     *ngIf="state.fields.emailAddress.touched && state.fields.emailAddress.errors">
-                  {{state.fields.lastName.errors}}
+                     *ngIf="control.typedControls.emailAddress.touched && control.typedControls.emailAddress.errors">
+                  {{control.typedControls.lastName.errors}}
                 </div>
               </ng-container>
             </div>

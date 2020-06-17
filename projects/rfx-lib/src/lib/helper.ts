@@ -1,5 +1,5 @@
-import {FormRegistryKey, PrimitiveType} from './model';
-import {TypedFormRegistryKey} from './model';
+import { FormRegistryKey, PrimitiveType, TypedFormRegistryKey, TypedFormControlBase } from './model';
+import { ValidationErrors } from '@angular/forms';
 
 export function deepGet<T, K1 extends keyof T>(object: T, path: [K1], throwOnMiss?: boolean): T[K1];
 export function deepGet<T, K1 extends keyof T, K2 extends keyof T[K1]>(object: T, path: [K1, K2], throwOnMiss?: boolean): T[K1][K2];
@@ -83,4 +83,25 @@ export function normalizeKey(key: FormRegistryKey<any>): TypedFormRegistryKey<an
 
 export function raiseError(message: string): never {
   throw new Error(message);
+}
+
+export function getAliasFromControl(control: TypedFormControlBase): [string] | [] {
+  return control.formDefinition && control.formDefinition.alias && [control.formDefinition.alias] || [];
+}
+
+export function extractErrorsWithAliasPrefix(control: TypedFormControlBase, prefixSeparator = '.'): ValidationErrors | null {
+  if (!control.errors) {
+    return null;
+  }
+
+  let path: string[] = getAliasFromControl(control);
+  for (let parent = control.parentTypedControl; parent; parent = parent.parentTypedControl) {
+    path = [...getAliasFromControl(parent), ...path];
+  }
+
+  return Object.keys(control.errors).reduce((prefixedErrors, key) => {
+    const errors = control.errors || raiseError('Expected control to contain errors');
+    prefixedErrors[[...path, key].join(prefixSeparator)] = errors[key];
+    return prefixedErrors;
+  }, {} as ValidationErrors);
 }

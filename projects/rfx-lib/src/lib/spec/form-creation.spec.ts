@@ -1,5 +1,7 @@
 import { createForm, pushFormGroupArrayItem } from '../forms/form-creation';
 import { testFormDefinitionLong, testFormDefinitionShort } from './sample-form';
+import { FormDefinition } from '../model';
+import { TypedFormControl } from '../forms/typed-form-control';
 
 describe('Form creation', () => {
   describe('createForm', () => {
@@ -45,6 +47,42 @@ describe('Form creation', () => {
           age: 0
         }],
         favoriteNumber: null
+      });
+    });
+  });
+
+  describe('Custom form field', () => {
+    it('should create form with custom field', () => {
+      interface FormWithCustomField {
+        firstName: string;
+        lastName: string;
+        address: {
+          street: string;
+          no: number;
+        };
+      }
+
+      const formWithCustomFieldDefinition: FormDefinition<FormWithCustomField> = {
+        type: 'Group',
+        fields: {
+          firstName: 'First Name',
+          lastName: 'Last Name',
+          address: {
+            type: 'CustomField',
+            initialValue: {
+              street: 'Default street',
+              no: 5
+            }
+          }
+        }
+      };
+
+      const form = createForm(formWithCustomFieldDefinition);
+      const address = form.typedGetCustomField('address');
+      expect(address instanceof TypedFormControl).toBe(true);
+      expect(address.typedValue).toEqual({
+        street: 'Default street',
+        no: 5
       });
     });
   });

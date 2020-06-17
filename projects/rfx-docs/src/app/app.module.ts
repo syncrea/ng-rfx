@@ -4,9 +4,8 @@ import {NgModule} from '@angular/core';
 import {AppComponent} from './app.component';
 import {StoreModule} from '@ngrx/store';
 import {globalReducers} from './app.state';
-import {ReactiveFormsExtensionModule, RFX_ERROR_RESOLVER} from 'rfx-lib';
+import {ReactiveFormsExtensionModule} from 'rfx-lib';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {errorResolver} from './error-resolver';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatSidenavModule, MatToolbarModule, MatIconModule, MatListModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule} from '@angular/material';
 import {NavigationBarComponent} from './ui/navigation-bar/navigation-bar.component';
@@ -48,10 +47,6 @@ export function hljsLanguages() {
     MatFormFieldModule,
     MatInputModule
   ],
-  providers: [{
-    provide: RFX_ERROR_RESOLVER,
-    useValue: errorResolver
-  }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

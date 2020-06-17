@@ -28,32 +28,6 @@ describe('Observe form pipe', () => {
       expect(spyMarkForCheck).toHaveBeenCalled();
     });
 
-    it('should return form data when observed', () => {
-      const formRegistry = new FormRegistry();
-      const mockChangeDetectorRef = new MockChangeDetectorRef();
-      const spyMarkForCheck = spyOn(mockChangeDetectorRef, 'markForCheck');
-      const observeFormPipe = new ObserveFormPipe(formRegistry, mockChangeDetectorRef);
-      const formKey = formRegistry.createAndRegisterForm(testFormDefinitionLong);
-
-      const formData = WrappedValue.unwrap(observeFormPipe.transform(formKey, {strict: true, observe: 'FormData'}));
-      expect(formData).toBeDefined();
-      expect(formData.state.value.name).toBe('First name');
-      expect(spyMarkForCheck).toHaveBeenCalled();
-    });
-
-    it('should return form state when observed', () => {
-      const formRegistry = new FormRegistry();
-      const mockChangeDetectorRef = new MockChangeDetectorRef();
-      const spyMarkForCheck = spyOn(mockChangeDetectorRef, 'markForCheck');
-      const observeFormPipe = new ObserveFormPipe(formRegistry, mockChangeDetectorRef);
-      const formKey = formRegistry.createAndRegisterForm(testFormDefinitionLong);
-
-      const formState = WrappedValue.unwrap(observeFormPipe.transform(formKey, {strict: true, observe: 'FormState'}));
-      expect(formState).toBeDefined();
-      expect(formState.value.name).toBe('First name');
-      expect(spyMarkForCheck).toHaveBeenCalled();
-    });
-
     it('should return form value when observed', () => {
       const formRegistry = new FormRegistry();
       const mockChangeDetectorRef = new MockChangeDetectorRef();
@@ -124,32 +98,6 @@ describe('Observe form pipe', () => {
       expect(spyMarkForCheck).toHaveBeenCalled();
     }));
 
-    it('should return form data when observed', async(() => {
-      const formRegistry = new FormRegistry();
-      const mockChangeDetectorRef = new MockChangeDetectorRef();
-      const spyMarkForCheck = spyOn(mockChangeDetectorRef, 'markForCheck');
-      const observeFormPipe = new ObserveFormPipe(formRegistry, mockChangeDetectorRef);
-      const formKey = formRegistry.createAndRegisterForm(testFormDefinitionLong);
-
-      const formData =  WrappedValue.unwrap(observeFormPipe.transform(formKey, {strict: false, observe: 'FormData'}));
-      expect(formData).toBeDefined();
-      expect(formData.state.value.name).toBe('First name');
-      expect(spyMarkForCheck).toHaveBeenCalled();
-    }));
-
-    it('should return form state when observed', async(() => {
-      const formRegistry = new FormRegistry();
-      const mockChangeDetectorRef = new MockChangeDetectorRef();
-      const spyMarkForCheck = spyOn(mockChangeDetectorRef, 'markForCheck');
-      const observeFormPipe = new ObserveFormPipe(formRegistry, mockChangeDetectorRef);
-      const formKey = formRegistry.createAndRegisterForm(testFormDefinitionLong);
-
-      const formState = WrappedValue.unwrap(observeFormPipe.transform(formKey, {strict: false, observe: 'FormState'}));
-      expect(formState).toBeDefined();
-      expect(formState.value.name).toBe('First name');
-      expect(spyMarkForCheck).toHaveBeenCalled();
-    }));
-
     it('should return form value when observed', async(() => {
       const formRegistry = new FormRegistry();
       const mockChangeDetectorRef = new MockChangeDetectorRef();
@@ -195,7 +143,7 @@ describe('Observe form pipe', () => {
       const observeFormPipe = new ObserveFormPipe(formRegistry, mockChangeDetectorRef);
       const formKey = null as any;
 
-      const formData = WrappedValue.unwrap(observeFormPipe.transform(formKey, {strict: false, observe: 'FormData'}));
+      const formData = WrappedValue.unwrap(observeFormPipe.transform(formKey, {strict: false, observe: 'FormValue'}));
       expect(formData).toBe(null);
       expect(spyMarkForCheck).not.toHaveBeenCalled();
     }));
