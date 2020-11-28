@@ -65,7 +65,7 @@ describe('Form creation', () => {
           no: 1
         },
         children: [{
-          name: 'Zoé',
+          name: 'ZOÉ',
           age: 0
         }],
         favoriteNumber: null
@@ -88,15 +88,15 @@ describe('Form creation', () => {
       expect(form.typedControls.address.typedControls.street.typedValue).toEqual('Teststreet');
       expect(form.typedControls.address.typedControls.no.typedValue).toEqual(1);
       expect(form.typedControls.children.typedValue).toEqual([{
-        name: 'Zoé',
+        name: 'ZOÉ',
         age: 0
       }]);
       expect(form.typedControls.children.typedControls[0].typedValue).toEqual({
         name: 'Zoé',
-        age: 0
+        age: 1
       });
       expect(form.typedControls.children.typedControls[0].typedControls.name.typedValue).toEqual('Zoé');
-      expect(form.typedControls.children.typedControls[0].typedControls.age.typedValue).toEqual(0);
+      expect(form.typedControls.children.typedControls[0].typedControls.age.typedValue).toEqual(1);
       expect(form.typedControls.favoriteNumber.typedValue).toEqual(null);
     });
 
@@ -123,7 +123,7 @@ describe('Form creation', () => {
           no: 1
         },
         children: [{
-          name: 'Zoé',
+          name: 'ZOÉ',
           age: 0
         }],
         favoriteNumber: null
@@ -154,15 +154,15 @@ describe('Form creation', () => {
       expect(form.typedControls.address.typedControls.street.typedValue).toEqual('street');
       expect(form.typedControls.address.typedControls.no.typedValue).toEqual(1);
       expect(form.typedControls.children.typedValue).toEqual([{
-        name: 'Zoé',
+        name: 'ZOÉ',
         age: 0
       }]);
       expect(form.typedControls.children.typedControls[0].typedValue).toEqual({
         name: 'Zoé',
-        age: 0
+        age: 1
       });
       expect(form.typedControls.children.typedControls[0].typedControls.name.typedValue).toEqual('Zoé');
-      expect(form.typedControls.children.typedControls[0].typedControls.age.typedValue).toEqual(0);
+      expect(form.typedControls.children.typedControls[0].typedControls.age.typedValue).toEqual(1);
       expect(form.typedControls.favoriteNumber.typedValue).toEqual(null);
     });
   });

@@ -169,6 +169,13 @@ export const testFormDefinitionWithMapper: FormDefinitionGroup<MappingTestForm> 
     },
     children: {
       type: 'GroupArray',
+      options: {
+        mapper: (val: TestForm['children']) => val.map(v => ({
+          ...v,
+          name: toString(v.name.toUpperCase()),
+          age: toNumber(v.age)
+        }))
+      },
       group: {
         type: 'Group',
         fields: {
@@ -178,7 +185,10 @@ export const testFormDefinitionWithMapper: FormDefinitionGroup<MappingTestForm> 
           },
           age: {
             type: 'Field',
-            initialValue: 0
+            initialValue: 0,
+            options: {
+              mapper: val => val && ++val || 1
+            }
           }
         },
       },
