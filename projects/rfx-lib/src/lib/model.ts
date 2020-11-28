@@ -15,18 +15,34 @@ export interface TypedFormControlBase {
   readonly errorsWithAliasPath: ValidationErrors | null;
 }
 
-export interface FormDefinitionBase {
+export type MapperFn<T> = (val?: T | null) => T;
+
+export type MapperOptions<T> =
+  T extends string ? 'string' | MapperFn<string> :
+    T extends number ? 'number' | MapperFn<number> :
+      T extends boolean ? 'boolean' | MapperFn<boolean> :
+        T extends string[] ? 'string[]' | MapperFn<string[]> :
+          T extends number[] ? 'number[]' | MapperFn<number[]> :
+            T extends boolean[] ? 'boolean[]' | MapperFn<boolean[]> :
+        'string' | 'number' | 'boolean' | MapperFn<T> | MapperFn<PrimitiveType> |
+              'string[]' | 'number[]' | 'boolean[]' | MapperFn<T[]> | MapperFn<PrimitiveType[]>;
+
+export interface MappingControlOptions<T> extends AbstractControlOptions {
+  readonly mapper?: MapperOptions<T>;
+}
+
+export interface FormDefinitionBase<T> {
   readonly type: FormDefinitionTypeLiteral;
-  readonly options?: AbstractControlOptions;
+  readonly options?: MappingControlOptions<T>;
   readonly alias?: string;
 }
 
-export interface FormDefinitionField<T> extends FormDefinitionBase {
+export interface FormDefinitionField<T> extends FormDefinitionBase<T> {
   readonly type: 'Field';
   readonly initialValue: T;
 }
 
-export interface FormDefinitionCustomField<T> extends FormDefinitionBase {
+export interface FormDefinitionCustomField<T> extends FormDefinitionBase<T> {
   readonly type: 'CustomField';
   readonly initialValue: T;
 }
@@ -40,17 +56,17 @@ export type FormDefinitionFields<F> = {
   [K in keyof F]: FormDefinitionInfer<F[K]>;
 };
 
-export interface FormDefinitionGroup<F> extends FormDefinitionBase {
+export interface FormDefinitionGroup<F> extends FormDefinitionBase<F> {
   readonly type: 'Group';
   readonly fields: FormDefinitionFields<F>;
 }
 
-export interface FormDefinitionPrimitiveArray<T> extends FormDefinitionBase {
+export interface FormDefinitionPrimitiveArray<T> extends FormDefinitionBase<T[]> {
   readonly type: 'PrimitiveArray';
   readonly initialValue?: T[];
 }
 
-export interface FormDefinitionGroupArray<F> extends FormDefinitionBase {
+export interface FormDefinitionGroupArray<F> extends FormDefinitionBase<F[]> {
   readonly type: 'GroupArray';
   readonly group: FormDefinitionGroup<F>;
   readonly initialItems?: number;

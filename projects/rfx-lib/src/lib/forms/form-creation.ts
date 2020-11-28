@@ -7,8 +7,8 @@ import {
   PrimitiveType,
   TypedFormControlInfer
 } from '../model';
-import {TypedFormArray, TypedFormControl, TypedFormGroup} from './typed-form-control';
-import {isPrimitiveListType, isPrimitiveType} from '../helper';
+import { TypedFormArray, TypedFormControl, TypedFormGroup } from './typed-form-control';
+import { getMapper, isPrimitiveListType, isPrimitiveType } from '../helper';
 
 export function createForm<T extends PrimitiveType>(initialValue: T | FormDefinitionField<T>): TypedFormControl<T>;
 export function createForm<T extends PrimitiveType[]>(initialValue: T | FormDefinitionPrimitiveArray<T[0]>): TypedFormArray<T[0]>;
@@ -28,17 +28,36 @@ export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | 
     });
   } else if (formDefinitionOrInitialValue.type === 'Field' || formDefinitionOrInitialValue.type === 'CustomField') {
     return new TypedFormControl(formDefinitionOrInitialValue.initialValue, formDefinitionOrInitialValue.options, undefined, !isPrimitiveType(formDefinitionOrInitialValue) ? formDefinitionOrInitialValue : undefined);
-  } else if (formDefinitionOrInitialValue.type === 'Group') {
-    const controls = Object.keys(formDefinitionOrInitialValue.fields).reduce((fieldControls, fieldName) => {
-      fieldControls[fieldName] = createForm((<any>formDefinitionOrInitialValue.fields)[fieldName]);
-      return fieldControls;
-    }, <any>{});
-    return new TypedFormGroup(controls, formDefinitionOrInitialValue.options, undefined, formDefinitionOrInitialValue);
   } else if (formDefinitionOrInitialValue.type === 'PrimitiveArray') {
     const controls = (formDefinitionOrInitialValue.initialValue || []).map(initialValue => createForm(<any>initialValue));
     return new TypedFormArray(controls, formDefinitionOrInitialValue.options, undefined, !isPrimitiveListType(formDefinitionOrInitialValue) ? formDefinitionOrInitialValue : undefined);
+  } else if (formDefinitionOrInitialValue.type === 'Group') {
+    const controls = Object.keys(formDefinitionOrInitialValue.fields).reduce((fieldControls, fieldName) => ({
+      ...fieldControls,
+      [fieldName]: createForm((<any>formDefinitionOrInitialValue.fields)[fieldName])
+    }), <any>{});
+    const groupFieldMappers = Object.keys(formDefinitionOrInitialValue.fields).reduce((fieldMappers, fieldName) => {
+      const fieldDefinitionOrInitialValue = (<any>formDefinitionOrInitialValue.fields)[fieldName];
+      const fieldOptions = fieldDefinitionOrInitialValue && fieldDefinitionOrInitialValue.options;
+      return {
+        ...fieldMappers,
+        [fieldName]: fieldOptions && fieldOptions.mapper || ((val: any) => val)
+      };
+    }, <any>{});
+    const opts = {
+      ...formDefinitionOrInitialValue.options,
+      mapper: formDefinitionOrInitialValue.options && formDefinitionOrInitialValue.options.mapper ||
+        ((val: any) => Object.keys(val).reduce((obj, key) => {
+          const mapper = getMapper(groupFieldMappers[key]);
+          return {
+            ...obj,
+            [key]: mapper(val[key])
+          };
+        }, <any>{}))
+    };
+    return new TypedFormGroup(controls, opts, undefined, formDefinitionOrInitialValue);
   } else if (formDefinitionOrInitialValue.type === 'GroupArray') {
-    const controls = Array.from({length: formDefinitionOrInitialValue.initialItems || 0}).map(() => createForm(formDefinitionOrInitialValue.group));
+    const controls = Array.from({ length: formDefinitionOrInitialValue.initialItems || 0 }).map(() => createForm(formDefinitionOrInitialValue.group));
     return new TypedFormArray(<any>controls, formDefinitionOrInitialValue.options, undefined, formDefinitionOrInitialValue);
   } else {
     throw new Error(`Invalid form definition or initial value ${formDefinitionOrInitialValue}`);

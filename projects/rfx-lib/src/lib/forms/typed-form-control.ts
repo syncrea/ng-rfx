@@ -1,20 +1,32 @@
-import {PrimitiveType, FormDefinition, TypedFormControlBase} from '../model';
-import {AbstractControlOptions, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn, ValidationErrors} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {EventEmitter} from '@angular/core';
-import {map} from 'rxjs/operators';
-import { extractErrorsWithAliasPrefix } from '../helper';
+import { FormDefinition, MapperFn, MappingControlOptions, PrimitiveType, TypedFormControlBase } from '../model';
+import { AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { EventEmitter } from '@angular/core';
+import { map } from 'rxjs/operators';
+import { extractErrorsWithAliasPrefix, getMapper } from '../helper';
 
 export class TypedFormControl<T> extends FormControl implements TypedFormControlBase {
-  constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<T>) {
+  private readonly mapper: MapperFn<T>;
+
+  constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | MappingControlOptions<T> | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<T>) {
     super(formState, validatorOrOpts, asyncValidator);
+    const mapperOpts = validatorOrOpts && (validatorOrOpts as MappingControlOptions<T>).mapper;
+    if (mapperOpts) {
+      this.mapper = getMapper(mapperOpts);
+    }
   }
 
   get typedValue(): T {
+    if (this.mapper) {
+      return this.mapper(this.value);
+    }
     return this.value;
   }
 
   get typedValueChanges(): Observable<T> {
+    if (this.mapper) {
+      return this.valueChanges.pipe(map(value => this.mapper(value)));
+    }
     return this.valueChanges;
   }
 
@@ -51,56 +63,74 @@ export class TypedFormControl<T> extends FormControl implements TypedFormControl
     super.reset(formState, options);
   }
 
-  private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
+  private emitIfRequired(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}) {
     if (opts.emitEvent !== false) {
       (<EventEmitter<any>>this.statusChanges).emit(this.status);
     }
   }
 
-  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsTouched({onlySelf: opts.onlySelf});
+  markAsTouched(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsTouched({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsUntouched({onlySelf: opts.onlySelf});
+  markAsUntouched(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsUntouched({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsDirty({onlySelf: opts.onlySelf});
+  markAsDirty(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsDirty({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsPristine({onlySelf: opts.onlySelf});
+  markAsPristine(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsPristine({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 }
 
 type TypedFormGroupChildInternal<F, K extends keyof F> =
   F[K] extends PrimitiveType ? TypedFormControl<F[K]> :
-  F[K] extends (infer E)[] ? TypedFormArray<E> : TypedFormGroup<F[K]>;
-type TypedFormGroupControlsInternal<F> = {[K in keyof F]: TypedFormGroupChildInternal<F, K>};
+    F[K] extends (infer E)[] ? TypedFormArray<E> : TypedFormGroup<F[K]>;
+type TypedFormGroupControlsInternal<F> = { [K in keyof F]: TypedFormGroupChildInternal<F, K> };
 
 export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase {
-  constructor(controls: TypedFormGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<F>) {
+  private readonly mapper: MapperFn<F>;
+
+  constructor(controls: TypedFormGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | MappingControlOptions<F> | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<F>) {
     super(controls, validatorOrOpts, asyncValidator);
+    const mapperOpts = validatorOrOpts && (validatorOrOpts as MappingControlOptions<F>).mapper;
+    if (mapperOpts) {
+      this.mapper = getMapper(mapperOpts);
+    }
   }
 
   get typedValue(): F {
+    if (this.mapper) {
+      return this.mapper(this.value);
+    }
     return this.value;
   }
 
   get typedRawValue(): F {
+    if (this.mapper) {
+      return this.mapper(this.getRawValue());
+    }
     return this.getRawValue();
   }
 
   get typedValueChanges(): Observable<F> {
+    if (this.mapper) {
+      return this.valueChanges.pipe(map(value => this.mapper(value)));
+    }
     return this.valueChanges;
   }
 
   get typedRawValueChanges(): Observable<F> {
+    if (this.mapper) {
+      return this.valueChanges.pipe(map(() => this.mapper(this.typedRawValue)));
+    }
     return this.valueChanges.pipe(map(() => this.typedRawValue));
   }
 
@@ -151,29 +181,29 @@ export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase
     super.reset(formState, options);
   }
 
-  private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
+  private emitIfRequired(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}) {
     if (opts.emitEvent !== false) {
       (<EventEmitter<any>>this.statusChanges).emit(this.status);
     }
   }
 
-  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsTouched({onlySelf: opts.onlySelf});
+  markAsTouched(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsTouched({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsUntouched({onlySelf: opts.onlySelf});
+  markAsUntouched(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsUntouched({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsDirty({onlySelf: opts.onlySelf});
+  markAsDirty(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsDirty({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsPristine({onlySelf: opts.onlySelf});
+  markAsPristine(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsPristine({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 }
@@ -181,28 +211,46 @@ export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase
 type TypedFormControlOrGroupArrayInternal<T> = T extends PrimitiveType ? TypedFormControl<T> : TypedFormGroup<T>;
 
 export class TypedFormArray<T> extends FormArray implements TypedFormControlBase {
-  constructor(controls: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<T>) {
+  private readonly mapper: MapperFn<T[]>;
+
+  constructor(controls: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | MappingControlOptions<T[]> | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<T>) {
     super(controls, validatorOrOpts, asyncValidator);
+    const mapperOpts = validatorOrOpts && (validatorOrOpts as MappingControlOptions<T[]>).mapper;
+    if (mapperOpts) {
+      this.mapper = getMapper(mapperOpts);
+    }
   }
 
   get typedValue(): T[] {
+    if (this.mapper) {
+      return this.mapper(this.value);
+    }
     return this.value;
   }
 
   get typedRawValue(): T[] {
+    if (this.mapper) {
+      return this.mapper(this.getRawValue());
+    }
     return this.getRawValue();
   }
 
-  get typedControls(): TypedFormControlOrGroupArrayInternal<T>[] {
-    return <TypedFormControlOrGroupArrayInternal<T>[]>this.controls;
-  }
-
   get typedValueChanges(): Observable<T[]> {
+    if (this.mapper) {
+      return this.valueChanges.pipe(map(value => this.mapper(value)));
+    }
     return this.valueChanges;
   }
 
   get typedRawValueChanges(): Observable<T[]> {
+    if (this.mapper) {
+      return this.valueChanges.pipe(map(() => this.mapper(this.typedRawValue)));
+    }
     return this.valueChanges.pipe(map(() => this.typedRawValue));
+  }
+
+  get typedControls(): TypedFormControlOrGroupArrayInternal<T>[] {
+    return <TypedFormControlOrGroupArrayInternal<T>[]>this.controls;
   }
 
   get errorsWithAliasPath(): ValidationErrors | null {
@@ -251,29 +299,29 @@ export class TypedFormArray<T> extends FormArray implements TypedFormControlBase
     super.reset(formState, options);
   }
 
-  private emitIfRequired(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}) {
+  private emitIfRequired(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}) {
     if (opts.emitEvent !== false) {
       (<EventEmitter<any>>this.statusChanges).emit(this.status);
     }
   }
 
-  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsTouched({onlySelf: opts.onlySelf});
+  markAsTouched(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsTouched({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsUntouched({onlySelf: opts.onlySelf});
+  markAsUntouched(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsUntouched({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsDirty({onlySelf: opts.onlySelf});
+  markAsDirty(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsDirty({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 
-  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
-    super.markAsPristine({onlySelf: opts.onlySelf});
+  markAsPristine(opts: { onlySelf?: boolean, emitEvent?: boolean } = {}): void {
+    super.markAsPristine({ onlySelf: opts.onlySelf });
     this.emitIfRequired(opts);
   }
 }

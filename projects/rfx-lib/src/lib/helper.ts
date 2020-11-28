@@ -1,4 +1,11 @@
-import { FormRegistryKey, PrimitiveType, TypedFormRegistryKey, TypedFormControlBase } from './model';
+import {
+  FormRegistryKey,
+  MapperFn,
+  MapperOptions,
+  PrimitiveType,
+  TypedFormControlBase,
+  TypedFormRegistryKey
+} from './model';
 import { ValidationErrors } from '@angular/forms';
 
 export function deepGet<T, K1 extends keyof T>(object: T, path: [K1], throwOnMiss?: boolean): T[K1];
@@ -104,4 +111,55 @@ export function extractErrorsWithAliasPrefix(control: TypedFormControlBase, pref
     prefixedErrors[[...path, key].join(prefixSeparator)] = errors[key];
     return prefixedErrors;
   }, {} as ValidationErrors);
+}
+
+export function getMapper<T>(mappingOptions: MapperOptions<T>): MapperFn<T> {
+  if (mappingOptions === 'string') {
+    return toString as unknown as MapperFn<T>;
+  }
+  if (mappingOptions === 'number') {
+    return toNumber as unknown as MapperFn<T>;
+  }
+  if (mappingOptions === 'boolean') {
+    return toBoolean as unknown as MapperFn<T>;
+  }
+  if (mappingOptions === 'string[]') {
+    return toStringArray as unknown as MapperFn<T>;
+  }
+  if (mappingOptions === 'number[]') {
+    return toNumberArray as unknown as MapperFn<T>;
+  }
+  if (mappingOptions === 'boolean[]') {
+    return toBooleanArray as unknown as MapperFn<T>;
+  }
+  return mappingOptions as MapperFn<T>;
+}
+
+export function toString(val?: string | null): string {
+  return val || '';
+}
+
+export function toNumber(val?: number | string | null): number {
+  return val && +val || 0;
+}
+
+export function toBoolean(val?: boolean | string | null): boolean {
+  if (!val) {
+    return false;
+  }
+  const str = '' + val;
+  const lower = str.toLowerCase();
+  return !!lower && lower !== 'false' && lower !== '0';
+}
+
+export function toStringArray(val?: string[] | null): string[] {
+  return val && val.map(v => toString(v)) || [];
+}
+
+export function toNumberArray(val?: number[] | string[] | null): number[] {
+  return val && (val as any[]).map(v => toNumber(v)) || [];
+}
+
+export function toBooleanArray(val?: boolean[] | string[] | null): boolean[] {
+  return val && (val as any[]).map(v => toBoolean(v)) || [];
 }
