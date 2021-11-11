@@ -1,5 +1,4 @@
 import {Component, ChangeDetectionStrategy, Input} from '@angular/core';
-import {Observable} from 'rxjs';
 
 @Component({
   selector: 'rfx-navigation-bar',

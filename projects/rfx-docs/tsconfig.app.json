@@ -2,11 +2,15 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "types": []
+    "types": [],
+    "allowJs": true
   },
-  "exclude": [
-    "projects/test.ts",
-    "**/*.spec.ts"
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts"
+  ],
+  "include": [
+    "projects/rfx-docs/src/**/*.d.ts"
   ],
   "path": {
     "rfx": "../rfx-lib/src/public_api",

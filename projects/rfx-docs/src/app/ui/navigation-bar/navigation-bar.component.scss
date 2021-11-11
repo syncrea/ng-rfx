@@ -1,3 +1,4 @@
+@use '~@angular/material' as mat;
 @import '~@angular/material/theming';
 
 :host {
@@ -6,7 +7,7 @@
   width: 100%;
   align-items: center;
   padding: 8px 16px;
-  background-color: map-get($mat-amber, 500);
+  background-color: map-get(mat.$amber-palette, 500);
   z-index: 1000;
 
   @media screen and (max-width: 600px) {
