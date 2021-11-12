@@ -31,6 +31,10 @@
       ],
       "ng-rfx/*": [
         "projects/rfx-lib/src/*"
+      ],
+      "test": [
+        "dist/test/test",
+        "dist/test"
       ]
     }
   }
