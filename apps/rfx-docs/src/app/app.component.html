@@ -84,7 +84,7 @@ const control = new TypedFormGroup<SimpleForm>({
 
   <h2>Declaratively create your forms using form definitions</h2>
   <p>By using ng-rfx form definition object, you can manage your form configurations in a declarative way. Later on, just use the creatForm helper to create instances of your definitions. Thanks to the conditional generic typing mechanisms behind form definitions, you can enjoy full type-safety and editor auto-completion within your definitions.</p>
-  <pre><code highlight="import {createForm, FormDefinitionGroup} from 'ng-rfx';
+  <pre><code highlight="import {createForm, FormDefinition} from 'ng-rfx';
 import {Validators} from '@angular/forms';
 
 export interface PersonForm {
@@ -96,7 +96,7 @@ export interface PersonForm {
   }
 }
 
-export const personFormDefinition: FormDefinitionGroup<PersonForm> = {
+export const personFormDefinition: FormDefinition<PersonForm> = {
   type: 'Group',
   fields: {
     firstName: {
