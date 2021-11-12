@@ -1,4 +1,4 @@
-import {PrimitiveType, FormDefinition, TypedFormControlBase} from '../model';
+import {PrimitiveType, FormDefinitionAny, TypedFormControlBase} from '../model';
 import {AbstractControlOptions, AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidatorFn, ValidationErrors} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {EventEmitter} from '@angular/core';
@@ -6,7 +6,7 @@ import {map} from 'rxjs/operators';
 import { extractErrorsWithAliasPrefix } from '../helper';
 
 export class TypedFormControl<T> extends FormControl implements TypedFormControlBase {
-  constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<T>) {
+  constructor(formState?: T, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinitionAny<T>) {
     super(formState, validatorOrOpts, asyncValidator);
   }
 
@@ -84,7 +84,7 @@ type TypedFormGroupChildInternal<F, K extends keyof F> =
 type TypedFormGroupControlsInternal<F> = {[K in keyof F]: TypedFormGroupChildInternal<F, K>};
 
 export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase {
-  constructor(controls: TypedFormGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<F>) {
+  constructor(controls: TypedFormGroupControlsInternal<F>, validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinitionAny<F>) {
     super(controls, validatorOrOpts, asyncValidator);
   }
 
@@ -181,7 +181,7 @@ export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase
 type TypedFormControlOrGroupArrayInternal<T> = T extends PrimitiveType ? TypedFormControl<T> : TypedFormGroup<T>;
 
 export class TypedFormArray<T> extends FormArray implements TypedFormControlBase {
-  constructor(controls: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinition<T>) {
+  constructor(controls: TypedFormControlOrGroupArrayInternal<T>[], validatorOrOpts?: ValidatorFn | ValidatorFn[] | AbstractControlOptions | null, asyncValidator?: AsyncValidatorFn | AsyncValidatorFn[] | null, public readonly formDefinition?: FormDefinitionAny<T>) {
     super(controls, validatorOrOpts, asyncValidator);
   }
 

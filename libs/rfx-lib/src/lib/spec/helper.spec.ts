@@ -1,7 +1,7 @@
 import { createForm } from '../forms/form-creation';
 import { TypedFormControl } from '../forms/typed-form-control';
 import { deepGet, extractErrorsWithAliasPrefix, getAliasFromControl } from '../helper';
-import { FormDefinitionInfer } from '../model';
+import { FormDefinition } from '../model';
 
 describe('Helpers', () => {
   describe('deepGet', () => {
@@ -34,7 +34,7 @@ describe('Helpers', () => {
     });
 
     it('should get errors with root alias', () => {
-      const formDefinition: FormDefinitionInfer<{
+      const formDefinition: FormDefinition<{
         a: string;
         b: {
           c: string;
@@ -69,7 +69,7 @@ describe('Helpers', () => {
     });
 
     it('should get errors with complex alias path', () => {
-      const formDefinition: FormDefinitionInfer<{
+      const formDefinition: FormDefinition<{
         a: string;
         b: {
           c: string;

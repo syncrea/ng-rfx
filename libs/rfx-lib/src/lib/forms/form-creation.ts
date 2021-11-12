@@ -1,21 +1,19 @@
+import { isPrimitiveListType, isPrimitiveType, raiseError } from '../helper';
 import {
-  FormDefinition,
-  FormDefinitionField,
+  FormDefinitionAny, FormDefinitionCustomField, FormDefinitionField,
   FormDefinitionGroup,
   FormDefinitionGroupArray,
   FormDefinitionPrimitiveArray,
-  PrimitiveType,
-  TypedFormControlInfer
+  PrimitiveType, TypedFormControlInfer
 } from '../model';
-import {TypedFormArray, TypedFormControl, TypedFormGroup} from './typed-form-control';
-import {isPrimitiveListType, isPrimitiveType} from '../helper';
+import { TypedFormArray, TypedFormControl, TypedFormGroup } from './typed-form-control';
 
 export function createForm<T extends PrimitiveType>(initialValue: T | FormDefinitionField<T>): TypedFormControl<T>;
 export function createForm<T extends PrimitiveType[]>(initialValue: T | FormDefinitionPrimitiveArray<T[0]>): TypedFormArray<T[0]>;
 export function createForm<T>(formDefinition: FormDefinitionGroupArray<T>): TypedFormArray<T>;
 export function createForm<T>(formDefinition: FormDefinitionGroup<T>): TypedFormGroup<T>;
-export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | PrimitiveType | PrimitiveType[]): TypedFormControlInfer<any>;
-export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | PrimitiveType | PrimitiveType[]): TypedFormControlInfer<any> {
+export function createForm<T>(formDefinitionOrInitialValue: FormDefinitionAny<T> | PrimitiveType | PrimitiveType[]): TypedFormControlInfer<any>;
+export function createForm<T>(formDefinitionOrInitialValue: FormDefinitionAny<T> | PrimitiveType | PrimitiveType[]): TypedFormControlInfer<any> {
   if (isPrimitiveType(formDefinitionOrInitialValue)) {
     return createForm({
       type: 'Field',
@@ -45,7 +43,11 @@ export function createForm<T>(formDefinitionOrInitialValue: FormDefinition<T> | 
   }
 }
 
-export function pushFormGroupArrayItem<F>(formArrayDefinition: FormDefinitionGroupArray<F>, formArray: TypedFormArray<F>, value?: F): TypedFormArray<F> {
+export function pushFormGroupArrayItem<F>(formArrayDefinition: FormDefinitionGroupArray<F> | FormDefinitionCustomField<F[]>, formArray: TypedFormArray<F>, value?: F): TypedFormArray<F> {
+  if (formArrayDefinition.type === 'CustomField') {
+    raiseError(`Cannot use pushFormGroupArrayItem on TypedFormArray with definition of type 'CustomField'`);
+  }
+
   const formControl = createForm(formArrayDefinition.group);
   if (value) {
     formControl.setValue(value);

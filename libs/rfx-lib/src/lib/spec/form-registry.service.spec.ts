@@ -1,6 +1,5 @@
 import { Validators } from '@angular/forms';
-import createSpy = jasmine.createSpy;
-import { FormDefinitionGroup } from '../model';
+import { FormDefinition } from '../model';
 import { createForm } from '../forms/form-creation';
 import { FormRegistry } from '../forms/form-registry.service';
 import { raiseError } from '../helper';
@@ -15,7 +14,7 @@ describe('FormRegistryService', () => {
         readonly lastName: string;
       }
 
-      const simpleFormDefinition: FormDefinitionGroup<SimpleForm> = {
+      const simpleFormDefinition: FormDefinition<SimpleForm> = {
         type: 'Group',
         fields: {
           firstName: '',
@@ -37,7 +36,7 @@ describe('FormRegistryService', () => {
         readonly lastName: string;
       }
 
-      const simpleFormDefinition: FormDefinitionGroup<SimpleForm> = {
+      const simpleFormDefinition: FormDefinition<SimpleForm> = {
         type: 'Group',
         fields: {
           firstName: '',
@@ -59,7 +58,7 @@ describe('FormRegistryService', () => {
         readonly lastName: string;
       }
 
-      const simpleFormDefinition: FormDefinitionGroup<SimpleForm> = {
+      const simpleFormDefinition: FormDefinition<SimpleForm> = {
         type: 'Group',
         fields: {
           firstName: {
@@ -90,7 +89,7 @@ describe('FormRegistryService', () => {
         readonly lastName: string;
       }
 
-      const simpleFormDefinition: FormDefinitionGroup<SimpleForm> = {
+      const simpleFormDefinition: FormDefinition<SimpleForm> = {
         type: 'Group',
         fields: {
           firstName: {

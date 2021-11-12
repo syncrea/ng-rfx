@@ -3,7 +3,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Observable, of} from 'rxjs';
 import {TypedFormControl, TypedFormGroup} from '../forms/typed-form-control';
-import {FormDefinition, FormDefinitionGroup, FormRegistryKey} from '../model';
+import {FormDefinition, FormRegistryKey} from '../model';
 import {FormRegistry} from '../forms/form-registry.service';
 import {createForm} from '../forms/form-creation';
 import {createAction, createReducer, on, props, select, Store, StoreModule} from '@ngrx/store';
@@ -12,7 +12,6 @@ import {EffectsModule, Actions, createEffect, ofType} from '@ngrx/effects';
 import {uuid, raiseError} from '../helper';
 import {By} from '@angular/platform-browser';
 import {ReactiveFormsExtensionModule} from '../rfx-lib.module';
-import Spy = jasmine.Spy;
 
 describe('Form integration', () => {
   describe('typed personForm controls', () => {
@@ -168,7 +167,7 @@ describe('Form integration', () => {
       });
 
       it('should display failing validators when correct conditions are met', () => {
-        const simpleFormDefinition: FormDefinitionGroup<SimpleForm> = {
+        const simpleFormDefinition: FormDefinition<SimpleForm> = {
           type: 'Group',
           fields: {
             firstName: {
@@ -329,7 +328,7 @@ describe('Form integration', () => {
         lastName: string;
       }
 
-      const personFormDefinition: FormDefinitionGroup<PersonForm> = {
+      const personFormDefinition: FormDefinition<PersonForm> = {
         type: 'Group',
         fields: {
           firstName: 'Initial first name',
@@ -603,7 +602,7 @@ describe('Form integration', () => {
 
       type PersonForm = RegularPersonForm | MainPersonForm;
 
-      const regularPersonFormDefinition: FormDefinitionGroup<RegularPersonForm> = {
+      const regularPersonFormDefinition: FormDefinition<RegularPersonForm> = {
         type: 'Group',
         fields: {
           firstName: 'Initial first name',
@@ -611,7 +610,7 @@ describe('Form integration', () => {
         }
       };
 
-      const mainPersonFormDefinition: FormDefinitionGroup<MainPersonForm> = {
+      const mainPersonFormDefinition: FormDefinition<MainPersonForm> = {
         type: 'Group',
         fields: {
           firstName: 'Initial first name',

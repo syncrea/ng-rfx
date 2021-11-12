@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { merge, Observable } from 'rxjs';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { deepEquals, normalizeKey, uuid } from '../helper';
-import { FormDefinition, FormRegistryKey, InitialFormData, TypedFormControlInfer, TypedFormRegistryKey } from '../model';
+import { FormDefinitionAny, FormRegistryKey, InitialFormData, TypedFormControlInfer, TypedFormRegistryKey } from '../model';
 import { createForm } from './form-creation';
 
 export interface FormRegistryEntry<T> {
   form: TypedFormControlInfer<T>;
-  formDefinition?: FormDefinition<T>;
+  formDefinition?: FormDefinitionAny<T>;
 }
 
 export interface FormCreationOptions<T> {
@@ -25,7 +25,7 @@ export class FormRegistry {
     return key ? normalizeKey(key) : {id: uuid()};
   }
 
-  createAndRegisterForm<T>(formDefinition: FormDefinition<T>, options?: FormCreationOptions<T>): FormRegistryKey<T> {
+  createAndRegisterForm<T>(formDefinition: FormDefinitionAny<T>, options?: FormCreationOptions<T>): FormRegistryKey<T> {
     let normalizedKey: FormRegistryKey<T> | null = null;
     if (options && options.key) {
       normalizedKey = normalizeKey(options.key);
@@ -62,7 +62,7 @@ export class FormRegistry {
       return null;
     }
 
-    return <TypedFormControlInfer<T>>this.forms[key.id].form;
+    return this.forms[key.id].form as TypedFormControlInfer<T>;
   }
 
   removeForm(key: FormRegistryKey<any>): boolean {
@@ -87,12 +87,11 @@ export class FormRegistry {
     }
 
     const entry = this.forms[normalizedKey.id];
-    const control = <TypedFormControlInfer<T>>entry.form;
     return merge(
-      control.valueChanges.pipe(map(() => control.value)),
-      control.statusChanges.pipe(map(() => control.value))
+      entry.form.valueChanges.pipe(map(() => entry.form.value)),
+      entry.form.statusChanges.pipe(map(() => entry.form.value))
     ).pipe(
-      startWith(control.value),
+      startWith(entry.form.value),
       distinctUntilChanged((x, y) => deepEquals(x, y))
     );
   }

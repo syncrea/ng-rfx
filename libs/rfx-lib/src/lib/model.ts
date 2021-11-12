@@ -9,7 +9,7 @@ export type FormDefinitionTypeLiteral = 'Field' | 'CustomField' | 'Group' | 'Gro
 export interface TypedFormControlBase {
   readonly errors: ValidationErrors | null;
   readonly parentTypedControl: TypedFormControlBase | null;
-  readonly formDefinition?: FormDefinition<unknown>;
+  readonly formDefinition?: FormDefinitionAny<unknown>;
   readonly typedValue: unknown;
   readonly typedValueChanges: Observable<unknown>;
   readonly errorsWithAliasPath: ValidationErrors | null;
@@ -31,13 +31,13 @@ export interface FormDefinitionCustomField<T> extends FormDefinitionBase {
   readonly initialValue: T;
 }
 
-export type FormDefinitionInfer<T> =
+export type FormDefinition<T> =
   T extends PrimitiveType ? FormDefinitionField<T> | T :
-    T extends (infer E)[] ? E extends PrimitiveType ? FormDefinitionPrimitiveArray<E> | T : FormDefinitionGroupArray<E> :
+    T extends (infer E)[] ? E extends PrimitiveType ? FormDefinitionPrimitiveArray<E> | T | FormDefinitionCustomField<T> : FormDefinitionGroupArray<E> | FormDefinitionCustomField<T> :
       FormDefinitionGroup<T> | FormDefinitionCustomField<T>;
 
 export type FormDefinitionFields<F> = {
-  [K in keyof F]: FormDefinitionInfer<F[K]>;
+  [K in keyof F]: FormDefinition<F[K]>;
 };
 
 export interface FormDefinitionGroup<F> extends FormDefinitionBase {
@@ -56,7 +56,7 @@ export interface FormDefinitionGroupArray<F> extends FormDefinitionBase {
   readonly initialItems?: number;
 }
 
-export type FormDefinition<T> =
+export type FormDefinitionAny<T> =
   FormDefinitionField<T> |
   FormDefinitionCustomField<T> |
   FormDefinitionGroup<T> |

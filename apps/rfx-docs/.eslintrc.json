@@ -13,7 +13,7 @@
           "error",
           {
             "type": "attribute",
-            "prefix": "ngRfx",
+            "prefix": "rfxDocs",
             "style": "camelCase"
           }
         ],
@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "ng-rfx",
+            "prefix": "rfx-docs",
             "style": "kebab-case"
           }
         ]

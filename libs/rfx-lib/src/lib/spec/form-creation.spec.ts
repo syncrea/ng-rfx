@@ -114,5 +114,29 @@ describe('Form creation', () => {
         favoriteNumber: null
       });
     });
+
+    it('should throw error when used on custom field', () => {
+      interface ObjectArrayCustomFieldForm {
+        custom: { id: string, name: string}[];
+      }
+
+      const objectArrayCustomFieldFormDefinition: FormDefinition<ObjectArrayCustomFieldForm> = {
+        type: 'Group',
+        fields: {
+          custom: {
+            type: 'CustomField',
+            initialValue: [{id: '1', name: 'Item 1'}]
+          }
+        }
+      }
+
+      const form = createForm(objectArrayCustomFieldFormDefinition);
+      const run = () => pushFormGroupArrayItem(objectArrayCustomFieldFormDefinition.fields.custom, form.typedControls.custom, {
+        id: '2',
+        name: 'Item 2'
+      });
+
+      expect(run).toThrowError();
+    });
   });
 });
