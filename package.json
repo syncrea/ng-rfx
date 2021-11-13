@@ -1,6 +1,6 @@
 {
   "name": "ng-rfx",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "MIT",
   "scripts": {
     "ng": "nx",
@@ -18,11 +18,8 @@
     "@angular/core": "^12.2.0",
     "@angular/forms": "^12.2.0",
     "@angular/material": "^12.2.13",
-    "@angular/platform-browser": "^12.2.0",
     "@angular/platform-browser-dynamic": "^12.2.0",
     "@angular/router": "^12.2.0",
-    "@ngrx/effects": "^12.5.1",
-    "@ngrx/store": "^12.5.1",
     "@nrwl/angular": "12.9.0",
     "ngx-highlightjs": "^5.0.0",
     "rxjs": "~6.6.0",
@@ -30,6 +27,9 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
+    "@ngrx/effects": "^12.5.1",
+    "@ngrx/store": "^12.5.1",
+    "@angular/platform-browser": "^12.2.0",
     "@angular-devkit/build-angular": "~12.2.0",
     "@angular-eslint/eslint-plugin": "~12.3.0",
     "@angular-eslint/eslint-plugin-template": "~12.3.0",
