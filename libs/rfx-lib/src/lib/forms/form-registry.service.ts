@@ -75,6 +75,10 @@ export class FormRegistry {
     }
   }
 
+  clearForms(): void {
+    this.forms = {};
+  }
+
   containsForm(key: FormRegistryKey<any>): boolean {
     key = normalizeKey(key);
     return !!this.forms[key.id];
