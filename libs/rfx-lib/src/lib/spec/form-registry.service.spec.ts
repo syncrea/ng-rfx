@@ -50,6 +50,34 @@ describe('FormRegistryService', () => {
       expect(service.containsForm(simpleFormKey)).toBe(false);
     });
 
+    it('should clear all registered forms', () => {
+      const service = new FormRegistry();
+
+      interface SimpleForm {
+        readonly firstName: string;
+        readonly lastName: string;
+      }
+
+      const simpleFormDefinition: FormDefinition<SimpleForm> = {
+        type: 'Group',
+        fields: {
+          firstName: '',
+          lastName: ''
+        }
+      };
+
+      const simpleFormKey1 = service.createAndRegisterForm(simpleFormDefinition);
+      const simpleFormKey2 = service.createAndRegisterForm(simpleFormDefinition);
+      const simpleFormKey3 = service.createAndRegisterForm(simpleFormDefinition);
+      expect(service.containsForm(simpleFormKey1)).toBe(true);
+      expect(service.containsForm(simpleFormKey2)).toBe(true);
+      expect(service.containsForm(simpleFormKey3)).toBe(true);
+      service.clearForms();
+      expect(service.containsForm(simpleFormKey1)).toBe(false);
+      expect(service.containsForm(simpleFormKey2)).toBe(false);
+      expect(service.containsForm(simpleFormKey3)).toBe(false);
+    });
+
     it('should create and register custom personForm', () => {
       const service = new FormRegistry();
 
