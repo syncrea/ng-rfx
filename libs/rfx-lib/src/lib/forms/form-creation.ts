@@ -43,7 +43,15 @@ export function createForm<T>(formDefinitionOrInitialValue: FormDefinitionAny<T>
   }
 }
 
-export function pushFormGroupArrayItem<F>(formArrayDefinition: FormDefinitionGroupArray<F> | FormDefinitionCustomField<F[]>, formArray: TypedFormArray<F>, value?: F): TypedFormArray<F> {
+export function pushFormGroupArrayItem<F>(
+  formArrayDefinition: FormDefinitionGroupArray<F> | FormDefinitionCustomField<F[]>,
+  formArray: TypedFormArray<F>,
+  value?: F,
+  options?: {
+    emitEvent?: boolean;
+  }
+): TypedFormArray<F> {
+
   if (formArrayDefinition.type === 'CustomField') {
     raiseError(`Cannot use pushFormGroupArrayItem on TypedFormArray with definition of type 'CustomField'`);
   }
@@ -52,6 +60,6 @@ export function pushFormGroupArrayItem<F>(formArrayDefinition: FormDefinitionGro
   if (value) {
     formControl.setValue(value);
   }
-  formArray.push(formControl);
+  formArray.push(formControl, options);
   return formArray;
 }

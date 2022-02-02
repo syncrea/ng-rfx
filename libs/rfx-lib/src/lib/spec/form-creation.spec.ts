@@ -2,6 +2,8 @@ import { createForm, pushFormGroupArrayItem } from '../forms/form-creation';
 import { testFormDefinitionLong, testFormDefinitionShort } from './sample-form';
 import { FormDefinition } from '../model';
 import { TypedFormControl } from '../forms/typed-form-control';
+import { defaultIfEmpty, first, isEmpty, map, take, takeUntil } from 'rxjs/operators';
+import { timer } from 'rxjs';
 
 describe('Form creation', () => {
   describe('createForm', () => {
@@ -137,6 +139,39 @@ describe('Form creation', () => {
       });
 
       expect(run).toThrowError();
+    });
+
+    it('should not emit event from push if instructed', async() => {
+      const form = createForm(testFormDefinitionShort);
+      let valueChangeCount = 0;
+      form.typedGet('children').typedValueChanges.subscribe(() => valueChangeCount++);
+
+      pushFormGroupArrayItem(testFormDefinitionShort.fields.children, form.typedGet('children'), {
+        name: 'New Child',
+        age: 0
+      });
+
+      pushFormGroupArrayItem(testFormDefinitionShort.fields.children, form.typedGet('children'), {
+        name: 'Yet Another Child',
+        age: 0
+      }, {
+        emitEvent: false
+      });
+
+      expect(form.typedValue.children).toEqual(
+        [{
+          name: 'Zoé',
+          age: 0
+        }, {
+          name: 'New Child',
+          age: 0
+        }, {
+          name: 'Yet Another Child',
+          age: 0
+        }]
+      );
+
+      expect(valueChangeCount).toBe(1);
     });
   });
 });

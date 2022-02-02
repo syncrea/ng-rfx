@@ -10,6 +10,7 @@ export {
   FormDefinitionPrimitiveArray,
   FormDefinition,
   FormRegistryKey,
-  TypedFormRegistryKey
+  TypedFormRegistryKey,
+  TypedFormControlInfer
 } from './lib/model';
 export { ReactiveFormsExtensionModule } from './lib/rfx-lib.module';
