@@ -1,11 +1,11 @@
 {
   "name": "ng-rfx",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "peerDependencies": {
-    "@angular/common": ">=9 <13",
-    "@angular/core": ">=9 <13",
-    "@angular/forms": ">=9 <13",
-    "rxjs": ">=5"
+    "@angular/common": ">=9 <14",
+    "@angular/core": ">=9 <14",
+    "@angular/forms": ">=9 <14",
+    "rxjs": ">=6"
   },
   "dependencies": {
     "tslib": ">=2"
