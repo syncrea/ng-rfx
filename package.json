@@ -8,8 +8,7 @@
     "start": "nx serve",
     "build": "nx build",
     "test": "nx test",
-    "build-docs": "nx run rfx-docs:build:production --baseHref=/ng-rfx/",
-    "pack": "cd dist/libs/rfx-lib && npm pack"
+    "build-docs": "nx run rfx-docs:build:production --baseHref=/ng-rfx/"
   },
   "private": true,
   "dependencies": {
