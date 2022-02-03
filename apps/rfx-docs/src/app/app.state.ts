@@ -2,7 +2,7 @@ export interface AppState {
   version: string;
 }
 
-export function appReducer(state: AppState = {version: '2.0.4'}) {
+export function appReducer(state: AppState = {version: '3.0.0'}) {
   return state;
 }
 

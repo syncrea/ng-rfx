@@ -1,10 +1,10 @@
 {
   "name": "ng-rfx",
-  "version": "2.0.4",
+  "version": "3.0.0",
   "peerDependencies": {
-    "@angular/common": ">=9",
-    "@angular/core": ">=9",
-    "@angular/forms": ">=9",
+    "@angular/common": ">=12",
+    "@angular/core": ">=12",
+    "@angular/forms": ">=12",
     "rxjs": ">=6"
   },
   "dependencies": {
