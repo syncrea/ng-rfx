@@ -197,6 +197,10 @@ export class TypedFormArray<T> extends FormArray implements TypedFormControlBase
     return <TypedFormControlOrGroupArrayInternal<T>[]>this.controls;
   }
 
+  get typedControlsCustomField(): TypedFormControl<T>[] {
+    return <TypedFormControl<T>[]>this.controls;
+  }
+
   get typedValueChanges(): Observable<T[]> {
     return this.valueChanges;
   }
