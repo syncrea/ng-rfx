@@ -2,9 +2,6 @@
 
 **A simple toolkit for Angular Reactive Forms, to build scalable, type-safe and dynamic forms.**
 
-THIS LIBRARY IS IN RELEASE CANDIDATE MODE AND THE CODE AS WELL AS THE DOCUMENTATION
-IS NOT YET CONSIDERED STABLE!
-
 Project Documentation Website: [https://syncrea.github.io/ng-rfx/]
 
 ## Reduce the complexity of your form implementations

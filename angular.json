@@ -9,7 +9,9 @@
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
-          "outputs": ["{options.outputPath}"],
+          "outputs": [
+            "{options.outputPath}"
+          ],
           "options": {
             "outputPath": "dist/apps/rfx-docs",
             "index": "apps/rfx-docs/src/index.html",
@@ -21,7 +23,9 @@
               "apps/rfx-docs/src/favicon.ico",
               "apps/rfx-docs/src/assets"
             ],
-            "styles": ["apps/rfx-docs/src/styles.scss"],
+            "styles": [
+              "apps/rfx-docs/src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -86,13 +90,16 @@
         },
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/rfx-docs"],
+          "outputs": [
+            "coverage/apps/rfx-docs"
+          ],
           "options": {
             "jestConfig": "apps/rfx-docs/jest.config.js",
             "passWithNoTests": true
           }
         }
-      }
+      },
+      "tags": []
     },
     "rfx-lib": {
       "projectType": "library",
@@ -102,7 +109,9 @@
       "architect": {
         "build": {
           "builder": "@nrwl/angular:package",
-          "outputs": ["dist/libs/rfx-lib"],
+          "outputs": [
+            "dist/libs/rfx-lib"
+          ],
           "options": {
             "project": "libs/rfx-lib/ng-package.json"
           },
@@ -118,7 +127,9 @@
         },
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/rfx-lib"],
+          "outputs": [
+            "coverage/libs/rfx-lib"
+          ],
           "options": {
             "jestConfig": "libs/rfx-lib/jest.config.js",
             "passWithNoTests": true
@@ -133,39 +144,8 @@
             ]
           }
         }
-      }
-    }
-  },
-  "cli": {
-    "defaultCollection": "@nrwl/angular",
-    "packageManager": "npm"
-  },
-  "schematics": {
-    "@nrwl/angular": {
-      "application": {
-        "linter": "eslint"
       },
-      "library": {
-        "linter": "eslint"
-      },
-      "storybook-configuration": {
-        "linter": "eslint"
-      }
-    },
-    "@nrwl/angular:application": {
-      "style": "scss",
-      "linter": "eslint",
-      "unitTestRunner": "jest",
-      "e2eTestRunner": "cypress"
-    },
-    "@nrwl/angular:library": {
-      "style": "scss",
-      "linter": "eslint",
-      "unitTestRunner": "jest"
-    },
-    "@nrwl/angular:component": {
-      "style": "scss"
+      "tags": []
     }
-  },
-  "defaultProject": "rfx-docs"
+  }
 }
