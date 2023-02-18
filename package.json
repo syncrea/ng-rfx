@@ -2,7 +2,10 @@
   "name": "ngrfx",
   "version": "15.0.1",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build-lib": "nx build rfx-lib",
+    "build-docs": "nx run rfx-docs:build:production --baseHref=/ng-rfx/"
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "~15.1.0",
