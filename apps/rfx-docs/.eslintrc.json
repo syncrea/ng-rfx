@@ -4,16 +4,12 @@
   "overrides": [
     {
       "files": ["*.ts"],
-      "extends": [
-        "plugin:@nrwl/nx/angular",
-        "plugin:@angular-eslint/template/process-inline-templates"
-      ],
       "rules": {
         "@angular-eslint/directive-selector": [
           "error",
           {
             "type": "attribute",
-            "prefix": "rfxDocs",
+            "prefix": "ngrfx",
             "style": "camelCase"
           }
         ],
@@ -21,11 +17,15 @@
           "error",
           {
             "type": "element",
-            "prefix": "rfx-docs",
+            "prefix": "ngrfx",
             "style": "kebab-case"
           }
         ]
-      }
+      },
+      "extends": [
+        "plugin:@nrwl/nx/angular",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ]
     },
     {
       "files": ["*.html"],

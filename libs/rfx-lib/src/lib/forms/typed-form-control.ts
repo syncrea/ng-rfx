@@ -26,7 +26,7 @@ export class TypedFormControl<T> extends FormControl implements TypedFormControl
     return this.parent as unknown as TypedFormControlBase;
   }
 
-  patchValue(value: T, options?: {
+  override patchValue(value: T, options?: {
     onlySelf?: boolean;
     emitEvent?: boolean;
     emitModelToViewChange?: boolean;
@@ -35,7 +35,7 @@ export class TypedFormControl<T> extends FormControl implements TypedFormControl
     super.patchValue(value, options);
   }
 
-  setValue(value: T, options?: {
+  override setValue(value: T, options?: {
     onlySelf?: boolean;
     emitEvent?: boolean;
     emitModelToViewChange?: boolean;
@@ -44,7 +44,7 @@ export class TypedFormControl<T> extends FormControl implements TypedFormControl
     super.setValue(value, options);
   }
 
-  reset(formState?: T, options?: {
+  override reset(formState?: T, options?: {
     onlySelf?: boolean;
     emitEvent?: boolean;
   }): void {
@@ -57,22 +57,22 @@ export class TypedFormControl<T> extends FormControl implements TypedFormControl
     }
   }
 
-  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsTouched({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsUntouched({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsDirty({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsPristine({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
@@ -126,7 +126,7 @@ export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase
     return <TypedFormControl<F[K]>>childControl;
   }
 
-  patchValue(value: Partial<F>, options?: {
+  override patchValue(value: Partial<F>, options?: {
     onlySelf?: boolean;
     emitEvent?: boolean;
     emitModelToViewChange?: boolean;
@@ -135,16 +135,17 @@ export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase
     super.patchValue(value, options);
   }
 
+  // @ts-expect-error
   setValue(value: F, options?: {
-    onlySelf?: boolean;
-    emitEvent?: boolean;
-    emitModelToViewChange?: boolean;
-    emitViewToModelChange?: boolean;
+    onlySelf?: boolean | undefined;
+    emitEvent?: boolean | undefined;
+    emitModelToViewChange?: boolean | undefined;
+    emitViewToModelChange?: boolean | undefined;
   }): void {
-    super.setValue(value, options);
+    super.setValue(value as {[k: string]: any}, options);
   }
 
-  reset(formState?: F, options?: {
+  override reset(formState?: F, options?: {
     onlySelf?: boolean;
     emitEvent?: boolean;
   }): void {
@@ -157,22 +158,22 @@ export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase
     }
   }
 
-  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsTouched({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsUntouched({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsDirty({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsPristine({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
@@ -226,7 +227,7 @@ export class TypedFormArray<T> extends FormArray implements TypedFormControlBase
     return <any>this.typedAt(index);
   }
 
-  patchValue(value: T[], options?: {
+  override patchValue(value: T[], options?: {
     onlySelf?: boolean;
     emitEvent?: boolean;
     emitModelToViewChange?: boolean;
@@ -235,7 +236,7 @@ export class TypedFormArray<T> extends FormArray implements TypedFormControlBase
     super.patchValue(value, options);
   }
 
-  setValue(value: T[], options?: {
+  override setValue(value: T[], options?: {
     onlySelf?: boolean;
     emitEvent?: boolean;
     emitModelToViewChange?: boolean;
@@ -244,7 +245,7 @@ export class TypedFormArray<T> extends FormArray implements TypedFormControlBase
     super.setValue(value, options);
   }
 
-  reset(formState?: T[], options?: {
+  override reset(formState?: T[], options?: {
     onlySelf?: boolean;
     emitEvent?: boolean;
   }): void {
@@ -257,22 +258,22 @@ export class TypedFormArray<T> extends FormArray implements TypedFormControlBase
     }
   }
 
-  markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsTouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsTouched({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsUntouched(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsUntouched({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsDirty(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsDirty({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }
 
-  markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
+  override markAsPristine(opts: {onlySelf?: boolean, emitEvent?: boolean} = {}): void {
     super.markAsPristine({onlySelf: opts.onlySelf});
     this.emitIfRequired(opts);
   }

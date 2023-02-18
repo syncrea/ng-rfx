@@ -1,19 +1,17 @@
-import { createForm, pushFormGroupArrayItem } from '../forms/form-creation';
+import { createForm, createNativeForm, pushFormGroupArrayItem } from '../forms/form-creation';
 import { testFormDefinitionLong, testFormDefinitionShort } from './sample-form';
 import { FormDefinition } from '../model';
 import { TypedFormControl } from '../forms/typed-form-control';
-import { defaultIfEmpty, first, isEmpty, map, take, takeUntil } from 'rxjs/operators';
-import { timer } from 'rxjs';
+import { FormControl, FormGroup } from '@angular/forms';
 
 describe('Form creation', () => {
+
   describe('createForm', () => {
     it('should create personForm control for primitive type', () => {
       const control = createForm<string>('Hello');
       expect(control.typedValue).toBe('Hello');
     });
-  });
 
-  describe('createForm', () => {
     it('should create personForm from longhand definition', () => {
       const form = createForm(testFormDefinitionLong);
       expect(form.typedValue).toEqual({
@@ -172,6 +170,56 @@ describe('Form creation', () => {
       );
 
       expect(valueChangeCount).toBe(1);
+    });
+  });
+
+  describe('createNativeForm', () => {
+    it('should create form control for primitive type', () => {
+      const control = createNativeForm<string>('Hello');
+      expect(control.value).toBe('Hello');
+    });
+
+    it('should create form control for primitive array type', () => {
+      const control = createNativeForm<string[]>(['Hello', 'World']);
+      expect(control.value).toEqual(['Hello', 'World']);
+    });
+
+    it('should create personForm from longhand definition', () => {
+      const form = createNativeForm(testFormDefinitionLong);
+      expect(form.value).toEqual({
+        name: 'First name',
+        middleName: null,
+        age: 33,
+        colors: ['Red', 'Green', 'Blue'],
+        address: {
+          street: 'Teststreet',
+          no: 1
+        },
+        children: [{
+          name: 'Zoé',
+          age: 0
+        }],
+        favoriteNumber: null
+      });
+    });
+
+    it('should create personForm from shorthand definition', () => {
+      const form = createNativeForm(testFormDefinitionShort);
+      expect(form.value).toEqual({
+        name: 'First name',
+        middleName: null,
+        age: 33,
+        colors: ['Red', 'Green', 'Blue'],
+        address: {
+          street: 'Teststreet',
+          no: 1
+        },
+        children: [{
+          name: 'Zoé',
+          age: 0
+        }],
+        favoriteNumber: null
+      });
     });
   });
 });

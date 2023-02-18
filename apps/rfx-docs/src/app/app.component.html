@@ -12,7 +12,7 @@
 </div>
 
 <div class="container">
-  <h2 class="title">What is RFX?</h2>
+  <h1 class="title">What is Ractive Forms Extension for Angular?</h1>
   <p><strong>Have you ever implemented large and dynamic forms using standard Angular reactive forms?</strong></p>
     <p>If you have, you probably know the pain of implementing forms in your application. This library aims to solve this by providing the necessary toolkit to build scalable forms.</p>
     <p><strong>Key features of the Reactive Forms Extension:</strong></p>
@@ -119,5 +119,63 @@ export const personFormDefinition: FormDefinition<PersonForm> = {
 
 const personFormGroup = createForm(personFormDefinition);
 const {firstName, lastName, address: {street, no}} = personFormGroup.typedValue;
+console.log(`${firstName} ${lastName} lives at ${street} ${no}`);"></code></pre>
+
+<h2>Using Angular 14 native typed controls</h2>
+  <p>Angular 14 has introduced a major improvement by incorporating strong typing with forms,
+    a development that is sure to resolve a major issue with form handling in Angular, as well
+    as resolve one of the major concerns of ng-rfx. This is great news for developers. However,
+    despite this improvement, ng-rfx still offers several other benefits, including its definition-first
+    approach and the resulting simplified instantiation handling.</p>
+
+  <p>Angular's approach differs from ng-rfx in that it adopts a control type definition design
+    as opposed to a value-first definition. This approach solves the one issue that ng-rfx cannot solve
+    without a little help, which is the correct type inference of FormControls that have an object
+    value type. To address this in ng-rfx, you need to use the getCustomValue helper. On the other
+    hand, with Angular, you can't use your simple domain models as the source of your form definitions, which
+    might still be attractive enough for you to keep ng-rfx as your form helper library.</p>
+
+  <p>For Angular as a framework, we believe the decision to prioritize consistency over convenience was
+    the right one. The ng-rfx library was always meant as a form ultility package for Angular and never ment to replace
+    anything of Angular. We believe there are still plenty of convenience features to keep using ng-rfx utilities for Angular 14+.</p>
+
+  <p>Besides Angular 15 support with our own typed control wrapper classes, we have also added a new helper to create native Angular controls
+    from your existing form definitions. This way you can decide to still use the form definition feature of ng-rfx, but rely on the native typed controls.
+  </p>
+  <pre><code highlight="import {createNativeForm, FormDefinition} from 'ng-rfx';
+import {Validators} from '@angular/forms';
+
+export interface PersonForm {
+  firstName: string;
+  lastName: string;
+  address: {
+    street: string;
+    no: number;
+  }
+}
+
+export const personFormDefinition: FormDefinition<PersonForm> = {
+  type: 'Group',
+  fields: {
+    firstName: {
+      type: 'Field',
+      initialValue: 'Peter',
+      options: {
+        validators: [Validators.required]
+      }
+    },
+    lastName: 'Pan',
+    address: {
+      type: 'Group',
+      fields: {
+        street: 'Neverlandstreet',
+        no: 12
+      }
+    }
+  }
+};
+
+const personFormGroup = createNativeForm(personFormDefinition);
+const {firstName, lastName, address: {street, no}} = personFormGroup.value;
 console.log(`${firstName} ${lastName} lives at ${street} ${no}`);"></code></pre>
 </div>

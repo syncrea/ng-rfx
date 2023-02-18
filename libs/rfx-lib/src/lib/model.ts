@@ -1,4 +1,4 @@
-import { AbstractControlOptions, ValidationErrors } from '@angular/forms';
+import { AbstractControl, AbstractControlOptions, FormArray, FormControl, FormGroup, ValidationErrors } from '@angular/forms';
 import { TypedFormArray, TypedFormControl, TypedFormGroup } from './forms/typed-form-control';
 import { Observable } from 'rxjs';
 
@@ -67,6 +67,13 @@ export type TypedFormControlInfer<T> =
   T extends PrimitiveType ? TypedFormControl<T> :
     T extends (infer E)[] ? TypedFormArray<E> :
       TypedFormGroup<T>;
+
+export type NativeFormControlInfer<T> =
+  T extends PrimitiveType ? FormControl<T> :
+    T extends (infer E)[] ? FormArray<AbstractControl<E>> :
+      FormGroup<{[K in keyof T]: NativeFormControlInfer<T[K]>}>;
+
+const f: FormGroup<{a: FormControl<string>}> = {} as any;
 
 export interface TypedFormRegistryKey<T> {
   id: string;

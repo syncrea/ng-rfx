@@ -1,9 +1,11 @@
+import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
 import { isPrimitiveListType, isPrimitiveType, raiseError } from '../helper';
 import {
   FormDefinitionAny, FormDefinitionCustomField, FormDefinitionField,
   FormDefinitionGroup,
   FormDefinitionGroupArray,
   FormDefinitionPrimitiveArray,
+  NativeFormControlInfer,
   PrimitiveType, TypedFormControlInfer
 } from '../model';
 import { TypedFormArray, TypedFormControl, TypedFormGroup } from './typed-form-control';
@@ -38,6 +40,41 @@ export function createForm<T>(formDefinitionOrInitialValue: FormDefinitionAny<T>
   } else if (formDefinitionOrInitialValue.type === 'GroupArray') {
     const controls = Array.from({length: formDefinitionOrInitialValue.initialItems || 0}).map(() => createForm(formDefinitionOrInitialValue.group));
     return new TypedFormArray(<any>controls, formDefinitionOrInitialValue.options, undefined, formDefinitionOrInitialValue);
+  } else {
+    throw new Error(`Invalid form definition or initial value ${formDefinitionOrInitialValue}`);
+  }
+}
+
+export function createNativeForm<T extends PrimitiveType>(initialValue: T | FormDefinitionField<T>): NativeFormControlInfer<T>;
+export function createNativeForm<T extends PrimitiveType[]>(initialValue: T | FormDefinitionPrimitiveArray<T[0]>): NativeFormControlInfer<T>;
+export function createNativeForm<T>(formDefinition: FormDefinitionGroupArray<T>): NativeFormControlInfer<T[]>;
+export function createNativeForm<T extends {[k: string]: any}>(formDefinition: FormDefinitionGroup<T>): NativeFormControlInfer<T>;
+export function createNativeForm<T>(formDefinitionOrInitialValue: FormDefinitionAny<T> | PrimitiveType | PrimitiveType[]): AbstractControl<any>;
+export function createNativeForm<T>(formDefinitionOrInitialValue: FormDefinitionAny<T> | PrimitiveType | PrimitiveType[]): AbstractControl<any> {
+  if (isPrimitiveType(formDefinitionOrInitialValue)) {
+    return createNativeForm({
+      type: 'Field',
+      initialValue: formDefinitionOrInitialValue
+    });
+  } else if (isPrimitiveListType(formDefinitionOrInitialValue)) {
+    return createNativeForm({
+      type: 'PrimitiveArray',
+      initialValue: formDefinitionOrInitialValue
+    });
+  } else if (formDefinitionOrInitialValue.type === 'Field' || formDefinitionOrInitialValue.type === 'CustomField') {
+    return new FormControl(formDefinitionOrInitialValue.initialValue, formDefinitionOrInitialValue.options);
+  } else if (formDefinitionOrInitialValue.type === 'Group') {
+    const controls = Object.keys(formDefinitionOrInitialValue.fields).reduce((fieldControls, fieldName) => {
+      fieldControls[fieldName] = createNativeForm((<any>formDefinitionOrInitialValue.fields)[fieldName]);
+      return fieldControls;
+    }, {} as {[k: string]: any});
+    return new FormGroup(controls, formDefinitionOrInitialValue.options);
+  } else if (formDefinitionOrInitialValue.type === 'PrimitiveArray') {
+    const controls = (formDefinitionOrInitialValue.initialValue || []).map(initialValue => createNativeForm(<any>initialValue));
+    return new FormArray(controls, formDefinitionOrInitialValue.options);
+  } else if (formDefinitionOrInitialValue.type === 'GroupArray') {
+    const controls = Array.from({length: formDefinitionOrInitialValue.initialItems || 0}).map(() => createNativeForm(formDefinitionOrInitialValue.group));
+    return new FormArray(controls, formDefinitionOrInitialValue.options, undefined);
   } else {
     throw new Error(`Invalid form definition or initial value ${formDefinitionOrInitialValue}`);
   }
