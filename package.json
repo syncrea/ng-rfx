@@ -1,6 +1,6 @@
 {
   "name": "ngrfx",
-  "version": "15.0.1",
+  "version": "15.0.2",
   "license": "MIT",
   "scripts": {
     "build-lib": "nx build rfx-lib",

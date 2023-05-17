@@ -135,7 +135,7 @@ export class TypedFormGroup<F> extends FormGroup implements TypedFormControlBase
     super.patchValue(value, options);
   }
 
-  // @ts-expect-error
+  /** @ts-expect-error For the moment we need to omit override modifier because of parameter type incompatibility */
   setValue(value: F, options?: {
     onlySelf?: boolean | undefined;
     emitEvent?: boolean | undefined;
