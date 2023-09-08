@@ -31,6 +31,36 @@ describe('Form creation', () => {
       });
     });
 
+    it('should create personForm with FormState', () => {
+      interface PersonForm {
+        firstName: string;
+        lastName: string;
+        age: number
+      }
+
+      const formFieldDefinition: FormDefinition<PersonForm> = {
+        type: 'Group',
+        fields: {
+          firstName: {
+            type: 'Field',
+            initialValue: { value: 'First Name', disabled: false }
+          },
+          lastName: {
+            type: 'Field',
+            initialValue: { value: 'Last Name', disabled: false }
+          },
+          age: 33
+        }
+      };
+
+      const form = createForm(formFieldDefinition);
+      expect(form.typedValue).toEqual({
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        age: 33
+      });
+    });
+
     it('should create personForm from shorthand definition', () => {
       const form = createForm(testFormDefinitionShort);
       expect(form.typedValue).toEqual({

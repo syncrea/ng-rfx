@@ -6,6 +6,11 @@ export type PrimitiveType = string | number | boolean | undefined | null;
 
 export type FormDefinitionTypeLiteral = 'Field' | 'CustomField' | 'Group' | 'GroupArray' | 'PrimitiveArray';
 
+export interface FormState<T> {
+  value: T; 
+  disabled: boolean; 
+};
+
 export interface TypedFormControlBase {
   readonly errors: ValidationErrors | null;
   readonly parentTypedControl: TypedFormControlBase | null;
@@ -23,7 +28,7 @@ export interface FormDefinitionBase {
 
 export interface FormDefinitionField<T> extends FormDefinitionBase {
   readonly type: 'Field';
-  readonly initialValue: T;
+  readonly initialValue: T | FormState<T>;
 }
 
 export interface FormDefinitionCustomField<T> extends FormDefinitionBase {
